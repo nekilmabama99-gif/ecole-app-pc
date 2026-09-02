@@ -401,6 +401,26 @@
     @page{ size:A4; margin:10mm; }
   }
 
+  .code-modal-backdrop{
+    position:fixed; inset:0; background:rgba(20,24,30,0.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999;
+  }
+  .code-modal{
+    background:var(--card); border-radius:var(--radius);
+    padding:22px 24px; width:340px; max-width:90vw;
+    box-shadow:0 12px 40px rgba(0,0,0,0.35);
+    font-family:var(--sans);
+  }
+  .code-modal p{margin:0 0 14px 0; color:var(--ink); font-size:14px; line-height:1.4;}
+  .code-modal input{
+    width:100%; box-sizing:border-box; padding:9px 10px;
+    border:1px solid var(--line); border-radius:6px; font-size:14px;
+    margin-bottom:14px;
+  }
+  .code-modal .code-modal-err{color:var(--red); font-size:13px; margin:-8px 0 12px 0; display:none;}
+  .code-modal-actions{display:flex; justify-content:flex-end; gap:10px;}
+
   @media (max-width:760px){
     body{flex-direction:column;}
     .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:12px;}
@@ -520,6 +540,7 @@
 
 <div class="toast" id="toast"></div>
 <div id="print-area"></div>
+<div id="code-modal-root"></div>
 
 <script>
 /* ---------- Default parameters ---------- */
@@ -935,14 +956,45 @@ function updateCrestDisplay(){
   el.innerHTML = LOGO_DATA_URL ? `<img src="${LOGO_DATA_URL}" alt="Logo">` : 'É';
 }
 
+// Demande la saisie d'une valeur via une boîte de dialogue maison (remplace window.prompt,
+// non supporté par Electron : les appels à prompt() y échouent silencieusement, ce qui bloquait
+// TOUTES les suppressions/réinitialisations sans aucun message d'erreur).
+// Retourne une Promise résolue avec la saisie (string), ou null si annulé.
+function demanderSaisie(message, {password=false, placeholder=''} = {}){
+  return new Promise(resolve=>{
+    const root = document.getElementById('code-modal-root');
+    root.innerHTML = `
+      <div class="code-modal-backdrop">
+        <div class="code-modal">
+          <p>${esc(message)}</p>
+          <input type="${password?'password':'text'}" id="code-modal-input" placeholder="${esc(placeholder)}" autocomplete="off">
+          <p class="code-modal-err" id="code-modal-err"></p>
+          <div class="code-modal-actions">
+            <button class="btn secondary small" id="code-modal-cancel" type="button">Annuler</button>
+            <button class="btn small" id="code-modal-ok" type="button">Valider</button>
+          </div>
+        </div>
+      </div>`;
+    const input = document.getElementById('code-modal-input');
+    const cleanup = (val)=>{ root.innerHTML=''; resolve(val); };
+    document.getElementById('code-modal-cancel').addEventListener('click', ()=>cleanup(null));
+    document.getElementById('code-modal-ok').addEventListener('click', ()=>cleanup(input.value));
+    input.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){ e.preventDefault(); cleanup(input.value); }
+      if(e.key==='Escape'){ e.preventDefault(); cleanup(null); }
+    });
+    input.focus();
+  });
+}
+
 // Demande le code de suppression avant toute suppression ou réinitialisation.
-// Retourne true si le code saisi est correct, false sinon (annulé ou incorrect).
-function confirmerAvecCode(message){
+// Retourne (async) true si le code saisi est correct, false sinon (annulé ou incorrect).
+async function confirmerAvecCode(message){
   if(!PARAMS.codeSuppression){
     alert("Aucun code de suppression n'est configuré.\n\nAllez dans Paramètres → Sécurité des suppressions pour en définir un avant de pouvoir supprimer ou réinitialiser quoi que ce soit.");
     return false;
   }
-  const saisie = prompt((message || 'Confirmez la suppression') + '\n\nEntrez le code de suppression :');
+  const saisie = await demanderSaisie((message || 'Confirmez la suppression') + ' — Entrez le code de suppression :', {password:true});
   if(saisie === null) return false;
   if(saisie !== PARAMS.codeSuppression){
     alert('Code incorrect. Suppression annulée.');
@@ -1243,6 +1295,25 @@ function classementClasse(classe, trimestre){
     effectif: resultats.length
   };
 }
+// Classement des élèves d'une classe pour UNE matière et un trimestre donnés (rang par matière,
+// distinct du rang général trimestriel). Sert à la fiche de vérification par matière.
+function classementParMatiere(classe, matiereId, trimestre){
+  const eleves = ELEVES.filter(e=>e.classe===classe);
+  const resultats = eleves.map(e=>{
+    const n = NOTES.find(x=>x.eleveId===e.id && x.matiereId===matiereId && x.trimestre===trimestre);
+    const moyenne = n ? moyenneMatiere(n).moyenne : null;
+    return { eleveId: e.id, moyenne };
+  }).filter(r=>r.moyenne!==null);
+  resultats.sort((a,b)=>b.moyenne-a.moyenne);
+  resultats.forEach((r,i)=>{ r.rang = i+1; });
+  return { classement: resultats, effectifNote: resultats.length };
+}
+function rangParMatiere(eleveId, classe, matiereId, trimestre){
+  const c = classementParMatiere(classe, matiereId, trimestre);
+  const r = c.classement.find(x=>x.eleveId===eleveId);
+  return r ? r.rang : null;
+}
+
 function rangDansClasse(eleveId, classe, trimestre){
   const c = classementClasse(classe, trimestre);
   const r = c.classement.find(x=>x.eleveId===eleveId);
@@ -2013,6 +2084,10 @@ function renderSaisieNotes(){
   <div class="tabs-sub">
     ${matieresClasse.map(m=>`<button data-matieretab="${m.id}" class="${matiereSaisieTab===m.id?'active':''}">${esc(m.nom)}</button>`).join('')}
   </div>
+  <div class="panel" style="padding:12px 16px;">
+    <button class="btn secondary small" data-action="print-fiche-resultats-trimestre" data-classe="${esc(classeSaisieTab)}" data-trimestre="${esc(trimestre)}">Imprimer la fiche des résultats trimestriels (${esc(classeSaisieTab)})</button>
+    <span class="desc" style="margin-left:10px;">Total des points, moyenne et rang général de la classe pour ${esc(trimestre)} — toutes matières.</span>
+  </div>
   ${renderGrilleSaisie(trimestre, classeSaisieTab, matiereSaisieTab)}
   ${renderDisciplinePanel(trimestre, classeSaisieTab)}
   `;
@@ -2063,7 +2138,7 @@ function renderGrilleSaisie(trimestre, classe, matiereId){
   <div class="panel">
     <div class="panel-head">
       <h3>${esc(classe)} — ${esc(matiere?matiere.nom:'')} — ${esc(trimestre)}</h3>
-      <button class="btn secondary small" data-action="print-grille-notes" data-classe="${esc(classe)}" data-matiere="${matiereId}" data-trimestre="${esc(trimestre)}">Imprimer</button>
+      <button class="btn secondary small" data-action="print-grille-notes" data-classe="${esc(classe)}" data-matiere="${matiereId}" data-trimestre="${esc(trimestre)}">Imprimer la fiche de vérification (matière)</button>
     </div>
     <p class="desc" style="margin:-6px 0 12px 0;">Pondération : ${PARAMS.ponderationDevoirs}% moyenne des devoirs + ${PARAMS.ponderationComposition}% composition. Les moyennes se recalculent automatiquement pendant la saisie.</p>
     <div class="table-wrap">
@@ -4553,26 +4628,60 @@ function buildClasseBulletinsHTML(classe, trimestre){
   return eleves.map((e,i)=> `<div style="${i<eleves.length-1?'page-break-after:always;':''}">${buildBulletinHTML(e.id, trimestre)}</div>`).join('');
 }
 
+// Fiche de vérification par matière : toutes les notes, la moyenne et le rang (dans la matière)
+// de chaque élève de la classe — destinée au professeur pour vérifier avec les élèves.
 function buildGrilleNotesPrintHTML(classe, matiereId, trimestre){
   const schoolName = esc(document.getElementById('school-name').value);
   const matiere = matieresPourClasse(classe).find(m=>m.id===matiereId);
   const eleves = ELEVES.filter(e=>e.classe===classe).sort((a,b)=>a.nom.localeCompare(b.nom));
-  const rows = eleves.map((e,i)=>{
+  const cl = classementParMatiere(classe, matiereId, trimestre);
+  const rows = eleves.map((e)=>{
     const n = NOTES.find(x=>x.eleveId===e.id && x.matiereId===matiereId && x.trimestre===trimestre);
     const c = n ? moyenneMatiere(n) : {d1:null,d2:null,moyDevoirs:null,comp:null,moyenne:null};
-    return `<tr><td>${i+1}</td><td>${esc(e.nom)} ${esc(e.prenom)}</td>
+    const rangEntry = cl.classement.find(r=>r.eleveId===e.id);
+    return `<tr><td>${esc(e.nom)} ${esc(e.prenom)}</td>
       <td>${c.d1!==null?c.d1:'—'}</td><td>${c.d2!==null?c.d2:'—'}</td>
       <td>${c.moyDevoirs!==null?c.moyDevoirs.toFixed(2):'—'}</td>
       <td>${c.comp!==null?c.comp:'—'}</td>
-      <td><strong>${c.moyenne!==null?c.moyenne.toFixed(2):'—'}</strong></td></tr>`;
+      <td><strong>${c.moyenne!==null?c.moyenne.toFixed(2):'—'}</strong></td>
+      <td>${rangEntry?rangEntry.rang+'e':'—'}</td></tr>`;
   }).join('');
   return `
-    <div class="bulletin" style="max-width:700px;">
+    <div class="bulletin" style="max-width:780px;">
       ${printHeader()}
-      <h3>${esc(classe)} — ${esc(matiere?matiere.nom:'')} — ${esc(trimestre)}</h3>
+      <h3>Fiche de vérification — ${esc(classe)} — ${esc(matiere?matiere.nom:'')} — ${esc(trimestre)}</h3>
+      <p class="bulletin-eleve-line">Effectif noté : ${cl.effectifNote} / ${eleves.length}</p>
       <table class="receipt-table">
-        <thead><tr><th>N°</th><th>Élève</th><th>Devoir 1</th><th>Devoir 2</th><th>Moy. dev.</th><th>Composition</th><th>Moyenne</th></tr></thead>
+        <thead><tr><th>Élève</th><th>Devoir 1</th><th>Devoir 2</th><th>Moy. dev.</th><th>Composition</th><th>Moyenne</th><th>Rang (matière)</th></tr></thead>
         <tbody>${rows || '<tr><td colspan="7">Aucun élève.</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Fiche des résultats trimestriels : total des points, moyenne trimestrielle et rang général
+// de chaque élève de la classe (toutes matières confondues) — pour vérification en classe.
+function buildFicheResultatsTrimestrePrintHTML(classe, trimestre){
+  const schoolName = esc(document.getElementById('school-name').value);
+  const eleves = ELEVES.filter(e=>e.classe===classe).sort((a,b)=>a.nom.localeCompare(b.nom));
+  const cl = classementClasse(classe, trimestre);
+  const rows = eleves.map((e)=>{
+    const t = computeTrimestre(e.id, trimestre);
+    const rangEntry = cl.classement.find(r=>r.eleveId===e.id);
+    return `<tr><td>${esc(e.nom)} ${esc(e.prenom)}</td>
+      <td>${t.totalCoeff>0?t.totalPointsAjuste.toFixed(2):'—'}</td>
+      <td>${t.totalCoeff>0?t.totalCoeff:'—'}</td>
+      <td><strong>${t.moyenneGenerale!==null?t.moyenneGenerale.toFixed(2):'—'}</strong></td>
+      <td>${rangEntry?rangEntry.rang+'e':'—'}</td></tr>`;
+  }).join('');
+  return `
+    <div class="bulletin" style="max-width:780px;">
+      ${printHeader()}
+      <h3>Fiche des résultats trimestriels — ${esc(classe)} — ${esc(trimestre)}</h3>
+      <p class="bulletin-eleve-line">Moyenne de la classe : ${cl.moyenneClasse!==null?cl.moyenneClasse.toFixed(2):'—'}/20 &nbsp;·&nbsp; Effectif noté : ${cl.effectif} / ${eleves.length}</p>
+      <table class="receipt-table">
+        <thead><tr><th>Élève</th><th>Total des points</th><th>Total coeff.</th><th>Moyenne trimestrielle</th><th>Rang</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="5">Aucun élève.</td></tr>'}</tbody>
       </table>
     </div>
   `;
@@ -4732,7 +4841,7 @@ function attachHandlers(){
     document.getElementById('content').addEventListener('click', async (e)=>{
       const delBtn = e.target.closest('[data-action="del-eleve"]');
       if(delBtn){
-        if(!confirmerAvecCode('Supprimer définitivement cet élève et toutes ses données (notes, paiements) ?')) return;
+        if(!(await confirmerAvecCode('Supprimer définitivement cet élève et toutes ses données (notes, paiements) ?'))) return;
         ELEVES = ELEVES.filter(x=>x.id!==delBtn.dataset.id);
         await saveEleves(); showToast('Élève supprimé'); render(); return;
       }
@@ -4841,7 +4950,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-examen-blanc"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cette session d\'examen blanc et toutes ses notes ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cette session d\'examen blanc et toutes ses notes ?'))) return;
         const id = btn.dataset.id;
         EXAMENS_BLANCS = EXAMENS_BLANCS.filter(eb=>eb.id!==id);
         NOTES_BLANC = NOTES_BLANC.filter(n=>n.examenBlancId!==id);
@@ -4945,6 +5054,11 @@ function attachHandlers(){
       openPrint(buildGrilleNotesPrintHTML(d.classe, d.matiere, d.trimestre));
     });
 
+    document.querySelector('[data-action="print-fiche-resultats-trimestre"]')?.addEventListener('click', (e)=>{
+      const d = e.target.dataset;
+      openPrint(buildFicheResultatsTrimestrePrintHTML(d.classe, d.trimestre));
+    });
+
     document.getElementById('btn-print-classe-bulletins')?.addEventListener('click', (e)=>{
       const classe = e.target.dataset.classe;
       const trimestre = document.getElementById('bulletin-trimestre').value;
@@ -5021,7 +5135,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-paiement"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer ce paiement ?')) return;
+        if(!(await confirmerAvecCode('Supprimer ce paiement ?'))) return;
         FINANCES.paiements = FINANCES.paiements.filter(x=>x.id!==btn.dataset.id);
         await saveFinances(); showToast('Paiement supprimé'); render();
       });
@@ -5034,7 +5148,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-depense"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cette dépense ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cette dépense ?'))) return;
         FINANCES.depenses = FINANCES.depenses.filter(x=>x.id!==btn.dataset.id);
         await saveFinances(); showToast('Dépense supprimée'); render();
       });
@@ -5078,7 +5192,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-paie"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer ce bulletin de salaire ?')) return;
+        if(!(await confirmerAvecCode('Supprimer ce bulletin de salaire ?'))) return;
         PAIE = PAIE.filter(x=>x.id!==btn.dataset.id);
         await savePaie(); showToast('Salaire supprimé'); render();
       });
@@ -5123,7 +5237,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-personnel"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer ce membre du personnel ?')) return;
+        if(!(await confirmerAvecCode('Supprimer ce membre du personnel ?'))) return;
         PERSONNEL = PERSONNEL.filter(x=>x.id!==btn.dataset.id);
         await savePersonnel(); showToast('Membre supprimé'); render();
       });
@@ -5158,7 +5272,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-conge-personnel"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cet enregistrement de congé/absence ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cet enregistrement de congé/absence ?'))) return;
         PERSONNEL_ABSENCES = PERSONNEL_ABSENCES.filter(x=>x.id!==btn.dataset.id);
         await savePersonnelAbsences(); showToast('Enregistrement supprimé'); render();
       });
@@ -5327,7 +5441,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-absence"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cette absence ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cette absence ?'))) return;
         ABSENCES = ABSENCES.filter(a=>a.id!==btn.dataset.id);
         await saveAbsences(); showToast('Absence supprimée'); render();
       });
@@ -5392,7 +5506,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-utilisateur"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer ce compte utilisateur ?')) return;
+        if(!(await confirmerAvecCode('Supprimer ce compte utilisateur ?'))) return;
         UTILISATEURS = UTILISATEURS.filter(u=>u.id!==btn.dataset.id);
         await saveUtilisateurs();
         showToast('Compte supprimé');
@@ -5408,7 +5522,7 @@ function attachHandlers(){
     document.querySelectorAll('.form-reset-mdp').forEach(form=>{
       form.addEventListener('submit', async (e)=>{
         e.preventDefault();
-        if(!confirmerAvecCode('Réinitialiser le mot de passe de cet utilisateur ?')) return;
+        if(!(await confirmerAvecCode('Réinitialiser le mot de passe de cet utilisateur ?'))) return;
         const u = UTILISATEURS.find(x=>x.id===form.dataset.id);
         if(!u) return;
         const f = new FormData(form);
@@ -5494,7 +5608,7 @@ function attachHandlers(){
       }
     });
     document.getElementById('btn-retirer-code-suppression')?.addEventListener('click', async ()=>{
-      if(!confirmerAvecCode('Retirer la protection par code de suppression ? Toute personne pourra ensuite supprimer des données sans confirmation.')) return;
+      if(!(await confirmerAvecCode('Retirer la protection par code de suppression ? Toute personne pourra ensuite supprimer des données sans confirmation.'))) return;
       PARAMS.codeSuppression = '';
       await saveParams();
       showToast('Protection retirée');
@@ -5516,7 +5630,7 @@ function attachHandlers(){
     Object.keys(resetsLocalises).forEach(action=>{
       document.querySelector(`[data-action="${action}"]`)?.addEventListener('click', async ()=>{
         const { label, fn } = resetsLocalises[action];
-        if(!confirmerAvecCode(`Réinitialiser ${label} de l'année en cours (${esc(anneeLibelle(anneeActiveId))}) ?`)) return;
+        if(!(await confirmerAvecCode(`Réinitialiser ${label} de l'année en cours (${esc(anneeLibelle(anneeActiveId))}) ?`))) return;
         if(!confirm(`Dernière confirmation : ${label} de l'année en cours seront effacé(e)s définitivement. Continuer ?`)) return;
         await fn();
         showToast('Réinitialisation effectuée');
@@ -5524,7 +5638,7 @@ function attachHandlers(){
       });
     });
     document.querySelector('[data-action="reset-annee-complete"]')?.addEventListener('click', async ()=>{
-      if(!confirmerAvecCode(`Tout réinitialiser pour l'année en cours (${esc(anneeLibelle(anneeActiveId))}) ?`)) return;
+      if(!(await confirmerAvecCode(`Tout réinitialiser pour l'année en cours (${esc(anneeLibelle(anneeActiveId))}) ?`))) return;
       if(!confirm("Dernière confirmation : élèves, notes, examens blancs, décisions, finances, personnel et paie de l'année en cours seront TOUS effacés définitivement. Les classes, matières et tarifs sont conservés. Continuer ?")) return;
       ELEVES = []; NOTES = []; EXAMENS_BLANCS = []; NOTES_BLANC = []; DECISIONS_BLANC = {}; ABSENCES = []; DISCIPLINE = {}; EMPLOI = []; DECISIONS = {}; FINANCES = { paiements: [], depenses: [] }; PERSONNEL = []; PAIE = [];
       await Promise.all([saveEleves(), saveNotes(), saveExamensBlancs(), saveNotesBlanc(), saveDecisionsBlanc(), saveAbsences(), saveDiscipline(), saveEmploi(), saveDecisions(), saveFinances(), savePersonnel(), savePaie()]);
@@ -5537,7 +5651,7 @@ function attachHandlers(){
       btn.addEventListener('click', async ()=>{
         const id = btn.dataset.annee;
         const libelle = anneeLibelle(id);
-        if(!confirmerAvecCode(`Réinitialiser (vider) les données archivées de l'année ${esc(libelle)} ?`)) return;
+        if(!(await confirmerAvecCode(`Réinitialiser (vider) les données archivées de l'année ${esc(libelle)} ?`))) return;
         if(!confirm(`Dernière confirmation : toutes les données archivées de ${esc(libelle)} (élèves, notes, finances, personnel, paie) seront effacées définitivement. L'année restera dans l'historique mais sans données. Continuer ?`)) return;
         delete ARCHIVES[id];
         await saveArchives();
@@ -5549,7 +5663,7 @@ function attachHandlers(){
       btn.addEventListener('click', async ()=>{
         const id = btn.dataset.annee;
         const libelle = anneeLibelle(id);
-        if(!confirmerAvecCode(`Supprimer complètement l'année ${esc(libelle)} de l'historique ?`)) return;
+        if(!(await confirmerAvecCode(`Supprimer complètement l'année ${esc(libelle)} de l'historique ?`))) return;
         if(!confirm(`Dernière confirmation : l'année ${esc(libelle)} et toutes ses données archivées seront supprimées définitivement et n'apparaîtront plus dans la liste des années. Continuer ?`)) return;
         delete ARCHIVES[id];
         ANNEES = ANNEES.filter(a=>a.id!==id);
@@ -5825,7 +5939,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-matiere"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cette matière ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cette matière ?'))) return;
         const classe = btn.dataset.classe;
         PARAMS.matieresParClasse[classe] = matieresPourClasse(classe).filter(x=>x.id!==btn.dataset.id);
         await saveParams(); showToast('Matière supprimée'); render();
@@ -5843,7 +5957,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-classe"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cette classe ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cette classe ?'))) return;
         const classeSupprimee = PARAMS.classes.find(x=>x.id===btn.dataset.id)?.nom;
         PARAMS.classes = PARAMS.classes.filter(x=>x.id!==btn.dataset.id);
         if(classeSupprimee && PARAMS.matieresParClasse) delete PARAMS.matieresParClasse[classeSupprimee];
@@ -5859,7 +5973,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-perso"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer ce paramètre personnalisé ?')) return;
+        if(!(await confirmerAvecCode('Supprimer ce paramètre personnalisé ?'))) return;
         PARAMS.personnalises = PARAMS.personnalises.filter(x=>x.id!==btn.dataset.id);
         await saveParams(); showToast('Paramètre supprimé'); render();
       });
@@ -5867,7 +5981,7 @@ function attachHandlers(){
 
     document.querySelectorAll('[data-action="del-list-item"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer cet élément ?')) return;
+        if(!(await confirmerAvecCode('Supprimer cet élément ?'))) return;
         const key = btn.dataset.key, idx = Number(btn.dataset.index);
         PARAMS[key].splice(idx,1);
         await saveParams(); showToast('Élément supprimé'); render();
@@ -5916,7 +6030,7 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-creneau"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!confirmerAvecCode('Supprimer ce créneau ? Les affectations déjà saisies sur ce créneau, dans toutes les classes, seront perdues.')) return;
+        if(!(await confirmerAvecCode('Supprimer ce créneau ? Les affectations déjà saisies sur ce créneau, dans toutes les classes, seront perdues.'))) return;
         const idx = Number(btn.dataset.index);
         const creneau = PARAMS.creneauxHoraires[idx];
         PARAMS.creneauxHoraires.splice(idx,1);
