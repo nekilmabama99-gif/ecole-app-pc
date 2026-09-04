@@ -235,8 +235,12 @@
   #print-area{display:none;}
   .receipt, .bulletin{font-family:var(--sans);color:#111;max-width:560px;margin:0 auto;}
   .receipt h2, .bulletin h2{font-family:var(--serif);color:var(--navy);margin:0 0 1px 0;font-size:16px;text-align:center;}
-  .doc-logo{display:block;max-width:70px;max-height:70px;margin:0 auto 6px auto;object-fit:contain;}
-  .doc-officiel{text-align:center;margin-bottom:8px;line-height:1.5;}
+  .doc-logo{display:block;max-width:70px;max-height:70px;margin:0 auto 4px auto;object-fit:contain;}
+  .doc-officiel{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;line-height:1.4;}
+  .doc-col-gauche{flex:1 1 0;text-align:left;min-width:0;}
+  .doc-col-centre{flex:0 0 auto;text-align:center;max-width:38%;}
+  .doc-col-centre h2{margin:0;}
+  .doc-col-droite{flex:1 1 0;text-align:right;min-width:0;}
   .table-emploi td, .table-emploi th{font-size:11px;padding:4px 5px;text-align:center;}
   .table-emploi .col-creneau{white-space:nowrap;font-size:10px;text-align:left;background:#fafaf8;}
   .table-emploi select{font-size:10.5px;padding:2px;}
@@ -247,7 +251,7 @@
   .table-emploi-print .col-creneau{white-space:nowrap;text-align:left;}
   .doc-pays{font-family:var(--serif);font-weight:700;font-size:12px;letter-spacing:.04em;color:var(--navy);}
   .doc-devise{font-size:9.5px;font-style:italic;color:var(--ink-soft);}
-  .doc-ministere{font-size:9px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink-soft);margin-top:1px;}
+  .doc-ministere{font-size:9px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink-soft);}
   .activation-overlay{
     position:fixed;inset:0;z-index:9999;background:var(--navy-dark);
     display:flex;align-items:center;justify-content:center;padding:20px;
@@ -335,7 +339,7 @@
     width:55%; opacity:0.09; z-index:0; pointer-events:none;
   }
   .attestation > *{position:relative; z-index:1;}
-  .attestation .doc-officiel{margin-bottom:2px;}
+  .attestation .doc-officiel{margin-bottom:2px;align-self:stretch;width:100%;}
   .attestation .doc-logo{max-width:62px;max-height:62px;margin:0 auto 2px auto;}
   .attestation-titre-doc{font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-top:16px;}
   .attestation h1{font-family:var(--serif);font-size:30px;color:var(--navy);letter-spacing:.07em;text-transform:uppercase;margin:6px 0 2px 0;}
@@ -420,6 +424,37 @@
   }
   .code-modal .code-modal-err{color:var(--red); font-size:13px; margin:-8px 0 12px 0; display:none;}
   .code-modal-actions{display:flex; justify-content:flex-end; gap:10px;}
+
+  .print-preview-backdrop{
+    position:fixed; inset:0; background:rgba(20,24,30,0.65);
+    z-index:9997; display:flex; flex-direction:column; align-items:center;
+    overflow:auto; padding:0 0 40px 0;
+  }
+  .print-preview-toolbar{
+    position:sticky; top:0; width:100%; z-index:2;
+    background:var(--navy-dark); color:#fff;
+    display:flex; justify-content:center; gap:12px;
+    padding:12px 16px; box-shadow:0 2px 10px rgba(0,0,0,0.3);
+  }
+  .print-preview-toolbar span{align-self:center; margin-right:auto; font-size:13px; opacity:0.85;}
+  .print-preview-page{
+    background:#fff; width:100%; max-width:850px; margin:24px 16px 0 16px;
+    padding:26px; box-shadow:0 6px 24px rgba(0,0,0,0.3); border-radius:6px;
+  }
+
+  .billets-page{
+    display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(4,1fr);
+    gap:4mm; page-break-after:always; height:277mm;
+  }
+  .billets-page:last-child{page-break-after:auto;}
+  .billet{
+    border:1px dashed #999; border-radius:4px; padding:6px 9px;
+    font-size:9px; display:flex; flex-direction:column; gap:3px; overflow:hidden;
+  }
+  .billet .billet-titre{font-family:var(--serif); font-weight:700; font-size:10.5px; text-align:center; border-bottom:1px solid var(--line); padding-bottom:3px; margin-bottom:2px;}
+  .billet .billet-ligne{display:flex; align-items:flex-end; gap:4px;}
+  .billet .billet-ligne .lbl{white-space:nowrap;}
+  .billet .billet-ligne .pointille{flex:1; border-bottom:1px dotted #888; height:11px;}
 
   @media (max-width:760px){
     body{flex-direction:column;}
@@ -512,6 +547,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Paramètres
     </button>
+    <button class="nav-btn" data-tab="admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Informations
+    </button>
   </nav>
   <div class="sidebar-foot" id="sidebar-foot-content">Données enregistrées automatiquement sur cet ordinateur, même hors connexion.</div>
 </div>
@@ -541,6 +580,7 @@
 <div class="toast" id="toast"></div>
 <div id="print-area"></div>
 <div id="code-modal-root"></div>
+<div id="print-preview-root"></div>
 
 <script>
 /* ---------- Default parameters ---------- */
@@ -616,7 +656,11 @@ const DEFAULT_PARAMS = {
   texteEnteteDeliberationBlanc: "Sous réserve d'un contrôle approfondi, les candidats dont les noms suivent sont déclarés {decision}.",
   texteFinDeliberationBlanc: "Arrêter la présente liste à {nombre} noms.",
   pinVerrouillage: '',
+  pinVerrouillageHash: '',
+  pinVerrouillageSel: '',
   codeSuppression: '',
+  codeSuppressionHash: '',
+  codeSuppressionSel: '',
   paysNom: 'BURKINA FASO',
   devise: 'La Patrie ou la Mort, Nous Vaincrons',
   ministere: "MINISTÈRE DE L'ÉDUCATION NATIONALE, DE L'ALPHABÉTISATION ET DE LA PROMOTION DES LANGUES NATIONALES",
@@ -702,6 +746,18 @@ const fmt = n => (Number(n)||0).toLocaleString('fr-FR') + ' FCFA';
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const esc = s => (s===undefined||s===null) ? '' : String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+// Convertit une valeur saisie manuellement dans une case de note en nombre borné [0, 20].
+// Une saisie hors bornes (ex. faute de frappe "205" au lieu de "20,5") est ramenée à la borne
+// la plus proche plutôt que d'être enregistrée telle quelle et de fausser silencieusement les
+// moyennes et classements ; `corrigee` indique qu'un avertissement doit être affiché.
+function parseNoteBornee(v){
+  if(v===''||v===null||v===undefined) return { valeur:null, corrigee:false };
+  const n = Number(v);
+  if(isNaN(n)) return { valeur:null, corrigee:false };
+  const borne = Math.max(0, Math.min(20, n));
+  return { valeur:borne, corrigee: borne!==n };
+}
+
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -712,6 +768,57 @@ function showToast(msg){
 
 /* ---------- Persistence (localStorage — 100% local, hors-ligne, sur cet ordinateur) ---------- */
 const STORAGE_PREFIX = 'gestion_ecole_';
+
+/* ---------- Stockage IndexedDB pour les images volumineuses (photos, logo, cachet, QR) ----------
+   localStorage est plafonné à quelques Mo. Une photo d'identité par élève dans un établissement
+   de quelques centaines d'élèves peut largement dépasser cette limite — et l'échec de sauvegarde
+   qui en résultait passait alors TOTALEMENT inaperçu (l'app affichait "enregistré" sans que rien
+   ne soit réellement écrit). Les images sont donc stockées à part, dans IndexedDB (capacité bien
+   plus grande), et gardées en cache mémoire (PHOTOS_CACHE) pour un accès synchrone — notamment
+   pour réimprimer d'anciens documents d'une année archivée sans dupliquer les photos à chaque
+   archivage. */
+let PHOTOS_CACHE = {};
+let _imageDbPromise = null;
+function ouvrirImageDB(){
+  if(!_imageDbPromise){
+    _imageDbPromise = new Promise((resolve, reject)=>{
+      const req = indexedDB.open('gestion_ecole_images', 1);
+      req.onupgradeneeded = ()=>{ req.result.createObjectStore('images'); };
+      req.onsuccess = ()=>resolve(req.result);
+      req.onerror = ()=>reject(req.error);
+    });
+  }
+  return _imageDbPromise;
+}
+async function imageDBGetAll(){
+  try{
+    const db = await ouvrirImageDB();
+    return await new Promise((resolve, reject)=>{
+      const tx = db.transaction('images','readonly');
+      const req = tx.objectStore('images').openCursor();
+      const resultat = {};
+      req.onsuccess = (ev)=>{
+        const cursor = ev.target.result;
+        if(cursor){ resultat[cursor.key] = cursor.value; cursor.continue(); }
+        else resolve(resultat);
+      };
+      req.onerror = ()=>reject(req.error);
+    });
+  }catch(e){ console.error('Erreur de lecture des images', e); return {}; }
+}
+async function imageDBSet(cle, valeur){
+  if(valeur){ PHOTOS_CACHE[cle] = valeur; } else { delete PHOTOS_CACHE[cle]; }
+  try{
+    const db = await ouvrirImageDB();
+    return await new Promise((resolve, reject)=>{
+      const tx = db.transaction('images','readwrite');
+      const store = tx.objectStore('images');
+      if(valeur) store.put(valeur, cle); else store.delete(cle);
+      tx.oncomplete = ()=>resolve(true);
+      tx.onerror = ()=>reject(tx.error);
+    });
+  }catch(e){ console.error("Erreur d'écriture d'image", cle, e); showToast("Erreur d'enregistrement d'une image (mémoire pleine ?)"); return false; }
+}
 
 /* ---------- Licence / activation ----------
    Signature asymétrique (ECDSA P-256) : ce fichier ne contient QUE la clé
@@ -787,11 +894,25 @@ function storageSet(key, data){
   try{
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(data));
     return true;
-  }catch(e){ console.error('Erreur de sauvegarde', e); showToast("Erreur d'enregistrement — mémoire du navigateur pleine ?"); return false; }
+  }catch(e){
+    console.error('Erreur de sauvegarde', e);
+    // Alerte BLOQUANTE et non un simple toast : un toast peut être immédiatement recouvert par
+    // le toast de succès affiché juste après par le code appelant, rendant l'échec invisible.
+    alert("⚠ ÉCHEC DE L'ENREGISTREMENT !\n\nLes dernières modifications n'ont PAS pu être sauvegardées (mémoire de stockage pleine ou inaccessible).\n\nFaites immédiatement une sauvegarde externe si possible (Paramètres → Sauvegarde), puis fermez et rouvrez l'application. Si le problème persiste, contactez le support.");
+    return false;
+  }
 }
 
 async function loadAll(){
+  PHOTOS_CACHE = await imageDBGetAll();
   ELEVES = storageGet('eleves-data') || [];
+  // Photos élèves : stockées à part (IndexedDB), voir saveEleves(). Migration automatique pour
+  // les sauvegardes antérieures où la photo était encore intégrée directement à eleves-data.
+  let migrationPhotos = false;
+  ELEVES.forEach(e=>{
+    if(e.photo){ PHOTOS_CACHE['photo-'+e.id] = e.photo; migrationPhotos = true; }
+    else if(PHOTOS_CACHE['photo-'+e.id]) e.photo = PHOTOS_CACHE['photo-'+e.id];
+  });
   NOTES = storageGet('notes-data') || [];
   EXAMENS_BLANCS = storageGet('examens-blancs-data') || [];
   NOTES_BLANC = storageGet('notes-blanc-data') || [];
@@ -810,13 +931,26 @@ async function loadAll(){
   PARAMS.paie = Object.assign({}, DEFAULT_PARAMS.paie, savedParams.paie || {});
   const savedName = storageGet('school-name');
   if(savedName) document.getElementById('school-name').value = savedName;
-  LOGO_DATA_URL = storageGet('logo-data') || '';
-  CACHET_SIGNATURE_DATA_URL = storageGet('cachet-signature-data') || '';
-  QR_PERSONNALISE_DATA_URL = storageGet('qr-personnalise-data') || '';
+  LOGO_DATA_URL = PHOTOS_CACHE['logo'] || storageGet('logo-data') || '';
+  CACHET_SIGNATURE_DATA_URL = PHOTOS_CACHE['cachet-signature'] || storageGet('cachet-signature-data') || '';
+  QR_PERSONNALISE_DATA_URL = PHOTOS_CACHE['qr-personnalise'] || storageGet('qr-personnalise-data') || '';
+  // Migration : logo/cachet/QR encore présents dans localStorage (ancien format) → IndexedDB.
+  if(storageGet('logo-data')){ await imageDBSet('logo', LOGO_DATA_URL); storageSet('logo-data', ''); }
+  if(storageGet('cachet-signature-data')){ await imageDBSet('cachet-signature', CACHET_SIGNATURE_DATA_URL); storageSet('cachet-signature-data', ''); }
+  if(storageGet('qr-personnalise-data')){ await imageDBSet('qr-personnalise', QR_PERSONNALISE_DATA_URL); storageSet('qr-personnalise-data', ''); }
   updateCrestDisplay();
 
   // Migration douce : garantir les champs nécessaires
+  if(migrationPhotos) await saveEleves(); // ré-enregistre eleves-data sans les photos, désormais dans IndexedDB
+  // Migration : un seul tarif par classe auparavant → deux tarifs (Affecté / Non affecté),
+  // initialisés avec l'ancien montant pour ne rien changer aux calculs existants tant que
+  // l'établissement n'a pas ajusté les nouveaux tarifs.
+  PARAMS.classes.forEach(c=>{
+    if(c.fraisAffecte===undefined) c.fraisAffecte = c.fraisAnnuel||0;
+    if(c.fraisNonAffecte===undefined) c.fraisNonAffecte = c.fraisAnnuel||0;
+  });
   ELEVES.forEach(e => { if(e.fraisAnnuel===undefined) e.fraisAnnuel = 0; });
+  ELEVES.forEach(e => { if(e.statutSport===undefined) e.statutSport = 'Apte'; if(e.motifDispenseSport===undefined) e.motifDispenseSport = ''; });
   ELEVES.forEach(e => { if(e.matricule===undefined) e.matricule = ''; });
   PERSONNEL.forEach(p => { if(p.salaireFixe===undefined) p.salaireFixe = 0; });
   PARAMS.matieres.forEach(m => { if(!m.categorie) m.categorie = 'Scientifique'; });
@@ -875,6 +1009,25 @@ async function loadAll(){
   if(PARAMS.convocationRendezVous===undefined) PARAMS.convocationRendezVous = "Nous vous prions de bien vouloir vous présenter le {date} à {heure}, {lieu}, munis de la présente convocation.";
   if(PARAMS.convocationFormule===undefined) PARAMS.convocationFormule = "Votre présence est vivement souhaitée dans l'intérêt du suivi scolaire de votre enfant.";
   if(PARAMS.codeSuppression===undefined) PARAMS.codeSuppression = '';
+  if(PARAMS.codeSuppressionHash===undefined) PARAMS.codeSuppressionHash = '';
+  if(PARAMS.codeSuppressionSel===undefined) PARAMS.codeSuppressionSel = '';
+  if(PARAMS.pinVerrouillageHash===undefined) PARAMS.pinVerrouillageHash = '';
+  if(PARAMS.pinVerrouillageSel===undefined) PARAMS.pinVerrouillageSel = '';
+  // Migration : le code de suppression et le code de verrouillage des Paramètres étaient
+  // auparavant stockés en clair. On les hache désormais (comme les mots de passe des comptes
+  // utilisateurs) et on efface la version en clair dès qu'elle est détectée.
+  if(PARAMS.codeSuppression && !PARAMS.codeSuppressionHash){
+    PARAMS.codeSuppressionSel = uid();
+    PARAMS.codeSuppressionHash = await hacherMotDePasse(PARAMS.codeSuppression, PARAMS.codeSuppressionSel);
+    PARAMS.codeSuppression = '';
+    await saveParams(); // efface promptement la version en clair du stockage, pas seulement de la mémoire
+  }
+  if(PARAMS.pinVerrouillage && !PARAMS.pinVerrouillageHash){
+    PARAMS.pinVerrouillageSel = uid();
+    PARAMS.pinVerrouillageHash = await hacherMotDePasse(PARAMS.pinVerrouillage, PARAMS.pinVerrouillageSel);
+    PARAMS.pinVerrouillage = '';
+    await saveParams(); // idem
+  }
   if(PARAMS.paysNom===undefined) PARAMS.paysNom = 'BURKINA FASO';
   if(PARAMS.devise===undefined) PARAMS.devise = 'La Patrie ou la Mort, Nous Vaincrons';
   if(PARAMS.ministere===undefined) PARAMS.ministere = "MINISTÈRE DE L'ÉDUCATION NATIONALE, DE L'ALPHABÉTISATION ET DE LA PROMOTION DES LANGUES NATIONALES";
@@ -927,8 +1080,16 @@ async function loadAll(){
   verifierRappelSauvegarde();
 }
 
-async function save(key, data){ storageSet(key, data); }
-const saveEleves = () => save('eleves-data', ELEVES);
+async function save(key, data){ return storageSet(key, data); }
+// Les photos (volumineuses en base64) ne sont jamais écrites dans localStorage : seules celles
+// qui ont changé sont synchronisées vers IndexedDB (voir imageDBSet / PHOTOS_CACHE), le reste
+// de la fiche élève continue d'aller dans localStorage comme avant.
+const saveEleves = async () => {
+  const changements = ELEVES.filter(e => (e.photo||null) !== (PHOTOS_CACHE['photo-'+e.id]||null));
+  await Promise.all(changements.map(e => imageDBSet('photo-'+e.id, e.photo||null)));
+  const sansPhotos = ELEVES.map(({photo, ...reste}) => reste);
+  return save('eleves-data', sansPhotos);
+};
 const saveNotes = () => save('notes-data', NOTES);
 const saveExamensBlancs = () => save('examens-blancs-data', EXAMENS_BLANCS);
 const saveNotesBlanc = () => save('notes-blanc-data', NOTES_BLANC);
@@ -946,9 +1107,9 @@ const savePaie = () => save('paie-data', PAIE);
 const saveAnnees = () => save('annees-data', ANNEES);
 const saveAnneeActive = () => save('annee-active-data', anneeActiveId);
 const saveArchives = () => save('archives-data', ARCHIVES);
-const saveLogo = () => save('logo-data', LOGO_DATA_URL);
-const saveCachetSignature = () => save('cachet-signature-data', CACHET_SIGNATURE_DATA_URL);
-const saveQrPersonnalise = () => save('qr-personnalise-data', QR_PERSONNALISE_DATA_URL);
+const saveLogo = () => imageDBSet('logo', LOGO_DATA_URL||null);
+const saveCachetSignature = () => imageDBSet('cachet-signature', CACHET_SIGNATURE_DATA_URL||null);
+const saveQrPersonnalise = () => imageDBSet('qr-personnalise', QR_PERSONNALISE_DATA_URL||null);
 
 function updateCrestDisplay(){
   const el = document.getElementById('sidebar-crest');
@@ -987,16 +1148,44 @@ function demanderSaisie(message, {password=false, placeholder=''} = {}){
   });
 }
 
+// Comme demanderSaisie, mais pour choisir une valeur dans une liste (menu déroulant) plutôt que
+// taper du texte libre. Retourne la valeur choisie, ou null si annulé.
+function demanderChoix(message, options){
+  return new Promise(resolve=>{
+    const root = document.getElementById('code-modal-root');
+    root.innerHTML = `
+      <div class="code-modal-backdrop">
+        <div class="code-modal">
+          <p>${esc(message)}</p>
+          <select id="code-modal-select" style="width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-size:14px;margin-bottom:14px;">
+            ${options.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}
+          </select>
+          <div class="code-modal-actions">
+            <button class="btn secondary small" id="code-modal-cancel" type="button">Annuler</button>
+            <button class="btn small" id="code-modal-ok" type="button">Valider</button>
+          </div>
+        </div>
+      </div>`;
+    const select = document.getElementById('code-modal-select');
+    const cleanup = (val)=>{ root.innerHTML=''; resolve(val); };
+    document.getElementById('code-modal-cancel').addEventListener('click', ()=>cleanup(null));
+    document.getElementById('code-modal-ok').addEventListener('click', ()=>cleanup(select.value));
+    select.focus();
+  });
+}
+
 // Demande le code de suppression avant toute suppression ou réinitialisation.
 // Retourne (async) true si le code saisi est correct, false sinon (annulé ou incorrect).
+// Le code est vérifié par hachage (voir hacherMotDePasse) et n'est jamais comparé en clair.
 async function confirmerAvecCode(message){
-  if(!PARAMS.codeSuppression){
+  if(!PARAMS.codeSuppressionHash){
     alert("Aucun code de suppression n'est configuré.\n\nAllez dans Paramètres → Sécurité des suppressions pour en définir un avant de pouvoir supprimer ou réinitialiser quoi que ce soit.");
     return false;
   }
   const saisie = await demanderSaisie((message || 'Confirmez la suppression') + ' — Entrez le code de suppression :', {password:true});
   if(saisie === null) return false;
-  if(saisie !== PARAMS.codeSuppression){
+  const hash = await hacherMotDePasse(saisie, PARAMS.codeSuppressionSel);
+  if(hash !== PARAMS.codeSuppressionHash){
     alert('Code incorrect. Suppression annulée.');
     return false;
   }
@@ -1009,11 +1198,13 @@ function printHeader(){
   const logo = LOGO_DATA_URL ? `<img class="doc-logo" src="${LOGO_DATA_URL}" alt="Logo">` : '';
   return `
     <div class="doc-officiel">
-      <div class="doc-pays">${esc(PARAMS.paysNom)}</div>
-      <div class="doc-devise">${esc(PARAMS.devise)}</div>
-      <div class="doc-ministere">${esc(PARAMS.ministere)}</div>
-    </div>
-    ${logo}<h2>${schoolName}</h2>`;
+      <div class="doc-col-gauche doc-ministere">${esc(PARAMS.ministere)}</div>
+      <div class="doc-col-centre">${logo}<h2>${schoolName}</h2></div>
+      <div class="doc-col-droite">
+        <div class="doc-pays">${esc(PARAMS.paysNom)}</div>
+        <div class="doc-devise">${esc(PARAMS.devise)}</div>
+      </div>
+    </div>`;
 }
 
 function updateAnneeSelect(){
@@ -1092,8 +1283,34 @@ function exportBackup(){
 function importBackup(file){
   const reader = new FileReader();
   reader.onload = async (e)=>{
+    let data;
     try{
-      const data = JSON.parse(e.target.result);
+      data = JSON.parse(e.target.result);
+    }catch(err){
+      alert("Fichier invalide : ce n'est pas un fichier de sauvegarde JSON lisible.\n\nAucune donnée n'a été modifiée.");
+      return;
+    }
+    // Validation minimale de structure : on refuse tout fichier qui ne ressemble pas à une vraie
+    // sauvegarde de l'application plutôt que de combler silencieusement les champs manquants par
+    // des tableaux vides — ce qui effaçait auparavant toute la base sans le moindre avertissement
+    // dès qu'un fichier invalide ou incomplet était sélectionné par erreur.
+    if(!data || typeof data!=='object' || !Array.isArray(data.eleves) || !data.parametres || typeof data.version==='undefined'){
+      alert("Ce fichier ne ressemble pas à une sauvegarde valide de cette application (structure inattendue).\n\nLa restauration a été annulée : aucune donnée n'a été modifiée.");
+      return;
+    }
+    // Confirmation obligatoire AVANT de remplacer toute la base — la restauration est l'action la
+    // plus destructrice de l'application (elle écrase tout), donc elle ne doit jamais se déclencher
+    // sur un simple clic accidentel dans le sélecteur de fichier.
+    const nbEleves = data.eleves.length;
+    const dateBackup = data.date ? new Date(data.date).toLocaleString('fr-FR') : 'inconnue';
+    const ecoleBackup = data.schoolName || '(nom non renseigné)';
+    const resume = `Cette opération va REMPLACER TOUTES les données actuelles (élèves, notes, finances, personnel...) par celles de ce fichier :\n\n`+
+      `• Établissement : ${ecoleBackup}\n• Nombre d'élèves dans la sauvegarde : ${nbEleves}\n• Date de la sauvegarde : ${dateBackup}\n\n`+
+      `Action irréversible. Pour confirmer, tapez RESTAURER ci-dessous :`;
+    const saisie = await demanderSaisie(resume, {placeholder:'RESTAURER'});
+    if(saisie!=='RESTAURER'){ showToast('Restauration annulée'); return; }
+
+    try{
       ELEVES = data.eleves || [];
       NOTES = data.notes || [];
       EXAMENS_BLANCS = data.examensBlancs || [];
@@ -1125,7 +1342,7 @@ function importBackup(file){
       showToast('Sauvegarde restaurée');
       render();
     }catch(err){
-      showToast('Fichier de sauvegarde invalide');
+      showToast('Erreur pendant la restauration');
     }
   };
   reader.readAsText(file);
@@ -1141,7 +1358,8 @@ const titles = {
   documents: ['Certificats', "Certificats de scolarité, non-redevance et attestations à imprimer"],
   absences: ['Absences', "Feuille d'appel et suivi des absences par classe"],
   emploi: ['Emploi du temps', "Grille horaire par classe, matière et enseignant"],
-  parametres: ['Paramètres', "Personnalisez matières, classes, frais et listes utilisées dans l'application"]
+  parametres: ['Paramètres', "Personnalisez matières, classes, frais et listes utilisées dans l'application"],
+  admin: ['Informations', "À propos de ce logiciel"]
 };
 
 document.getElementById('nav').addEventListener('click', (e)=>{
@@ -1203,12 +1421,17 @@ function render(){
   else if(currentTab==='absences') c.innerHTML = renderAbsences();
   else if(currentTab==='emploi') c.innerHTML = renderEmploiDuTemps();
   else if(currentTab==='parametres') c.innerHTML = renderParametres();
+  else if(currentTab==='admin') c.innerHTML = renderInfosAdmin();
   attachHandlers();
 }
 
 /* ---------- Helpers ---------- */
+// Un paiement au statut "Impayé" sert à noter qu'une échéance attendue n'a PAS été honorée —
+// son montant ne doit donc jamais compter comme argent réellement encaissé, même si le champ
+// montant reste renseigné (il représente alors la somme due sur cette échéance, pas reçue).
+function estEncaisse(p){ return p.statut!=='Impayé'; }
 function totalPayeParEleve(eleveId){
-  return FINANCES.paiements.filter(p=>p.eleveId===eleveId).reduce((s,p)=>s+Number(p.montant||0),0);
+  return FINANCES.paiements.filter(p=>p.eleveId===eleveId && estEncaisse(p)).reduce((s,p)=>s+Number(p.montant||0),0);
 }
 function matieresPourClasse(classeNom){
   if(!PARAMS.matieresParClasse) PARAMS.matieresParClasse = {};
@@ -1278,6 +1501,38 @@ function computeTrimestre(eleveId, trimestre){
 }
 
 // Classement d'une classe pour un trimestre donné (ou moyenne annuelle si trimestre==='ANNEE')
+// Attribue un rang à des résultats déjà triés par moyenne décroissante, en tenant compte des
+// égalités : deux moyennes strictement identiques reçoivent le même rang (ex æquo), et le rang
+// suivant est décalé du nombre d'ex æquo — convention scolaire usuelle (1er, 2e ex æquo, 2e ex
+// æquo, 4e...) plutôt que des rangs consécutifs qui ignoreraient l'égalité.
+// Convertit une saisie de montant en nombre, en acceptant la virgule comme séparateur décimal
+// (habituelle en français) en plus du point — les champs montant sont en texte libre pour cette
+// raison (un input type="number" natif rejette silencieusement la virgule).
+function parseMontant(v){
+  if(v===''||v===null||v===undefined) return null;
+  const n = Number(String(v).trim().replace(',', '.'));
+  return (isNaN(n) || n<0) ? null : n;
+}
+
+// Purge les photos (IndexedDB) qui ne sont plus référencées par aucun élève, ni dans l'année en
+// cours ni dans les archives restantes — évite l'accumulation silencieuse de photos orphelines
+// au fil des suppressions/réinitialisations d'archives.
+async function purgerPhotosOrphelines(){
+  const idsUtilises = new Set(ELEVES.map(e=>e.id));
+  Object.values(ARCHIVES).forEach(a=>{ (a.eleves||[]).forEach(e=>idsUtilises.add(e.id)); });
+  const aSupprimer = Object.keys(PHOTOS_CACHE).filter(cle=>cle.startsWith('photo-') && !idsUtilises.has(cle.slice(6)));
+  await Promise.all(aSupprimer.map(cle=>imageDBSet(cle, null)));
+}
+
+function attribuerRangsExAequo(resultats){
+  resultats.forEach((r,i)=>{
+    r.rang = (i>0 && r.moyenne===resultats[i-1].moyenne) ? resultats[i-1].rang : i+1;
+  });
+  const compte = {};
+  resultats.forEach(r=>{ compte[r.rang] = (compte[r.rang]||0)+1; });
+  resultats.forEach(r=>{ r.exAequo = compte[r.rang] > 1; });
+}
+
 function classementClasse(classe, trimestre){
   const elevesClasse = ELEVES.filter(e=>e.classe===classe);
   const resultats = elevesClasse.map(e=>{
@@ -1285,7 +1540,7 @@ function classementClasse(classe, trimestre){
     return { eleveId: e.id, moyenne: moy };
   }).filter(r=>r.moyenne!==null);
   resultats.sort((a,b)=>b.moyenne-a.moyenne);
-  resultats.forEach((r,i)=>{ r.rang = i+1; });
+  attribuerRangsExAequo(resultats);
   const moyennes = resultats.map(r=>r.moyenne);
   return {
     classement: resultats,
@@ -1305,7 +1560,7 @@ function classementParMatiere(classe, matiereId, trimestre){
     return { eleveId: e.id, moyenne };
   }).filter(r=>r.moyenne!==null);
   resultats.sort((a,b)=>b.moyenne-a.moyenne);
-  resultats.forEach((r,i)=>{ r.rang = i+1; });
+  attribuerRangsExAequo(resultats);
   return { classement: resultats, effectifNote: resultats.length };
 }
 function rangParMatiere(eleveId, classe, matiereId, trimestre){
@@ -1317,7 +1572,7 @@ function rangParMatiere(eleveId, classe, matiereId, trimestre){
 function rangDansClasse(eleveId, classe, trimestre){
   const c = classementClasse(classe, trimestre);
   const r = c.classement.find(x=>x.eleveId===eleveId);
-  return { rang: r?r.rang:null, effectif: c.effectif, moyenneClasse: c.moyenneClasse, forte: c.forte, faible: c.faible };
+  return { rang: r?r.rang:null, exAequo: r?r.exAequo:false, effectif: c.effectif, moyenneClasse: c.moyenneClasse, forte: c.forte, faible: c.faible };
 }
 
 function moyenneAnnuelle(eleveId){
@@ -1355,7 +1610,7 @@ function classementExamenBlanc(classe, examenBlancId){
     return { eleveId: e.id, moyenne: moy };
   }).filter(r=>r.moyenne!==null);
   resultats.sort((a,b)=>b.moyenne-a.moyenne);
-  resultats.forEach((r,i)=>{ r.rang = i+1; });
+  attribuerRangsExAequo(resultats);
   const moyennes = resultats.map(r=>r.moyenne);
   return {
     classement: resultats,
@@ -1529,7 +1784,7 @@ async function basculerAnneeScolaire(nouveauLibelle){
   ARCHIVES[ancienneId] = {
     libelle: ancienneLibelle,
     clotureLe: new Date().toISOString(),
-    eleves: eleveSnapshotAnneeEnCours,
+    eleves: eleveSnapshotAnneeEnCours.map(({photo, ...reste})=>reste), // photos non dupliquées : voir PHOTOS_CACHE / IndexedDB
     notes: JSON.parse(JSON.stringify(NOTES)),
     examensBlancs: JSON.parse(JSON.stringify(EXAMENS_BLANCS)),
     notesBlanc: JSON.parse(JSON.stringify(NOTES_BLANC)),
@@ -1583,6 +1838,7 @@ function withArchiveContext(anneeId, fn){
   if(!archive) return fn();
   const sauvegarde = { ELEVES, NOTES, EXAMENS_BLANCS, NOTES_BLANC, DECISIONS_BLANC, ABSENCES, DISCIPLINE, EMPLOI, DECISIONS, FINANCES, PERSONNEL, PERSONNEL_ABSENCES, PAIE };
   ELEVES = archive.eleves || [];
+  ELEVES.forEach(e=>{ if(!e.photo && PHOTOS_CACHE['photo-'+e.id]) e.photo = PHOTOS_CACHE['photo-'+e.id]; });
   NOTES = archive.notes || [];
   EXAMENS_BLANCS = archive.examensBlancs || [];
   NOTES_BLANC = archive.notesBlanc || [];
@@ -1783,15 +2039,20 @@ function renderArchiveAnnee(anneeId){
 /* ---------- Dashboard ---------- */
 function renderDashboard(){
   const nbEleves = ELEVES.filter(e=>e.statut!=='Inactif').length;
-  const totalPaye = FINANCES.paiements.reduce((s,p)=>s+Number(p.montant||0),0);
+  const totalPaye = FINANCES.paiements.filter(estEncaisse).reduce((s,p)=>s+Number(p.montant||0),0);
   const totalDepenses = FINANCES.depenses.reduce((s,d)=>s+Number(d.montant||0),0);
   const totalSalaires = PAIE.reduce((s,p)=>s+Number(p.net||0),0);
   const depensesTotales = totalDepenses + totalSalaires;
   const solde = totalPaye - depensesTotales;
   const nbPersonnelActif = PERSONNEL.filter(p=>p.statut==='Actif').length;
   const impayes = FINANCES.paiements.filter(p=>p.statut==='Impayé' || p.statut==='Partiel').length;
-  const totalDu = ELEVES.reduce((s,e)=>s+Number(e.fraisAnnuel||0),0);
-  const resteGlobal = Math.max(0, totalDu - totalPaye);
+  // "Reste à percevoir" doit rester cohérent avec "Élèves inscrits" ci-dessus (actifs uniquement) :
+  // on calcule donc le dû et le payé sur le même périmètre, plutôt que le dû des actifs contre
+  // l'encaissé de tout le monde (actifs + inactifs), ce qui gonflerait artificiellement ce chiffre.
+  const elevesActifs = ELEVES.filter(e=>e.statut!=='Inactif');
+  const totalDu = elevesActifs.reduce((s,e)=>s+Number(e.fraisAnnuel||0),0);
+  const totalPayeActifs = elevesActifs.reduce((s,e)=>s+totalPayeParEleve(e.id),0);
+  const resteGlobal = Math.max(0, totalDu - totalPayeActifs);
 
   return `
   <div class="kpi-grid">
@@ -1920,7 +2181,7 @@ function renderPersonnelSummary(){
 
 /* ---------- Élèves ---------- */
 function renderEleves(){
-  const classeOptions = PARAMS.classes.map(c=>`<option value="${esc(c.nom)}" data-frais="${c.fraisAnnuel}">${esc(c.nom)}</option>`).join('');
+  const classeOptions = PARAMS.classes.map(c=>`<option value="${esc(c.nom)}" data-frais-affecte="${Number(c.fraisAffecte||0)}" data-frais-non-affecte="${Number(c.fraisNonAffecte||0)}">${esc(c.nom)}</option>`).join('');
   const nomFilter = (document.getElementById('filter-eleve-nom')?.value || '');
   const classesConnues = PARAMS.classes.map(c=>c.nom);
   const classesOrphelines = [...new Set(ELEVES.map(e=>e.classe).filter(c=>c && !classesConnues.includes(c)))].sort();
@@ -1939,10 +2200,15 @@ function renderEleves(){
       <div class="field"><label>Sexe</label><select name="sexe"><option>F</option><option>M</option></select></div>
       <div class="field"><label>Date de naissance</label><input name="dateNaissance" type="date"></div>
       <div class="field"><label>Lieu de naissance</label><input name="lieuNaissance" placeholder="ex: Ouagadougou"></div>
+      <div class="field"><label>Nom du père</label><input name="nomPere" placeholder="Nom et prénom du père"></div>
+      <div class="field"><label>Nom de la mère</label><input name="nomMere" placeholder="Nom et prénom de la mère"></div>
       <div class="field"><label>Contact parent</label><input name="contact" placeholder="+226 ..."></div>
       <div class="field"><label>Profession de l'élève</label><input name="profession" placeholder="ex: Élève / Apprenti(e)..."></div>
       <div class="field"><label>Personne à prévenir en cas de besoin</label><input name="contactUrgenceNom" placeholder="Nom et prénom"></div>
       <div class="field"><label>Téléphone de cette personne</label><input name="contactUrgenceTelephone" placeholder="+226 ..."></div>
+      <div class="field"><label>Statut d'affectation</label><select id="new-eleve-affectation" name="statutAffectation"><option>Affecté</option><option>Non affecté</option></select></div>
+      <div class="field"><label>Aptitude sportive</label><select name="statutSport"><option value="Apte">Apte</option><option value="Dispensé">Dispensé</option></select></div>
+      <div class="field"><label>Année d'enregistrement dans l'établissement</label><input name="anneeEnregistrement" value="${esc(anneeLibelle(anneeActiveId))}" placeholder="ex: 2025-2026"></div>
       <div class="field"><label>Frais annuel (FCFA)</label><input id="new-eleve-frais" name="fraisAnnuel" type="number" min="0"></div>
       <div class="field"><label>Statut</label><select name="statut"><option>Actif</option><option>Inactif</option></select></div>
       <div class="field"><label>A déjà redoublé dans le cycle</label><select name="aDejaRedouble"><option value="">Non</option><option value="1">Oui</option></select></div>
@@ -1977,14 +2243,15 @@ function renderClasseElevesPanel(classe, nomFilter){
       <h3>${esc(classe)} (${eleves.length})</h3>
       <div style="display:flex;gap:8px;">
         <button class="btn secondary small" data-action="print-classe-eleves" data-classe="${esc(classe)}">Imprimer la liste</button>
+        <button class="btn secondary small" data-action="print-dispenses-sport" data-classe="${esc(classe)}">Liste des dispensés de sport</button>
         <button class="btn secondary small" data-action="export-csv-classe-eleves" data-classe="${esc(classe)}">Exporter CSV</button>
       </div>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Photo</th><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Contact</th><th>Profession élève</th><th>Personne à prévenir</th><th>Tél. urgence</th><th>Frais annuel</th><th>Payé</th><th>Reste à payer</th><th>Statut</th><th></th></tr></thead>
+        <thead><tr><th>Photo</th><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Contact</th><th>Profession élève</th><th>Personne à prévenir</th><th>Tél. urgence</th><th>Frais annuel</th><th>Payé</th><th>Reste à payer</th><th>Statut</th><th>Sport</th><th></th></tr></thead>
         <tbody>
-        ${eleves.length===0 ? '<tr class="empty-row"><td colspan="13">Aucun élève dans cette classe.</td></tr>' :
+        ${eleves.length===0 ? '<tr class="empty-row"><td colspan="14">Aucun élève dans cette classe.</td></tr>' :
           eleves.map(e=>{
             const paye = totalPayeParEleve(e.id);
             const reste = Number(e.fraisAnnuel||0) - paye;
@@ -2003,7 +2270,17 @@ function renderClasseElevesPanel(classe, nomFilter){
               <td>${fmt(paye)}</td>
               <td style="color:${reste>0?'var(--red)':'var(--green)'};font-weight:600;">${reste>0?fmt(reste):(reste<0?'Excédent '+fmt(-reste):'Soldé')}</td>
               <td><span class="badge ${e.statut==='Actif'?'actif':'inactif'}">${esc(e.statut)}</span></td>
-              <td><button class="btn danger small" data-action="del-eleve" data-id="${e.id}">Supprimer</button></td>
+              <td>
+                <select class="inline-num" style="width:100px;" data-action="edit-statut-sport" data-id="${e.id}">
+                  <option value="Apte" ${e.statutSport!=='Dispensé'?'selected':''}>Apte</option>
+                  <option value="Dispensé" ${e.statutSport==='Dispensé'?'selected':''}>Dispensé</option>
+                </select>
+                ${e.statutSport==='Dispensé' ? `<input class="inline-num" style="width:120px;margin-top:3px;" data-action="edit-motif-sport" data-id="${e.id}" value="${esc(e.motifDispenseSport)||''}" placeholder="Motif (certif. médical...)">` : ''}
+              </td>
+              <td style="white-space:nowrap;">
+                <button class="btn secondary small" data-action="changer-classe-eleve" data-id="${e.id}">Changer de classe</button>
+                <button class="btn danger small" data-action="del-eleve" data-id="${e.id}">Supprimer</button>
+              </td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -2086,6 +2363,7 @@ function renderSaisieNotes(){
   </div>
   <div class="panel" style="padding:12px 16px;">
     <button class="btn secondary small" data-action="print-fiche-resultats-trimestre" data-classe="${esc(classeSaisieTab)}" data-trimestre="${esc(trimestre)}">Imprimer la fiche des résultats trimestriels (${esc(classeSaisieTab)})</button>
+    <button class="btn secondary small" data-action="print-fiche-recap-generale" data-classe="${esc(classeSaisieTab)}" data-trimestre="${esc(trimestre)}">Imprimer la fiche récapitulative générale (${esc(classeSaisieTab)})</button>
     <span class="desc" style="margin-left:10px;">Total des points, moyenne et rang général de la classe pour ${esc(trimestre)} — toutes matières.</span>
   </div>
   ${renderGrilleSaisie(trimestre, classeSaisieTab, matiereSaisieTab)}
@@ -2225,7 +2503,7 @@ function renderExamensBlancs(){
   const classementRows = classement.classement.map(r=>{
     const el = ELEVES.find(e=>e.id===r.eleveId);
     const { decision } = decisionFinaleBlanc(r.eleveId, examenBlancActifTab, classeBlancTab, r.moyenne);
-    return `<tr><td>${r.rang}</td><td>${el?esc(el.nom)+' '+esc(el.prenom):'—'}</td><td><strong>${r.moyenne.toFixed(2)}</strong></td><td>${badgeDecisionBlanc(decision)}</td></tr>`;
+    return `<tr><td>${r.rang}${r.exAequo?' <span style=\"font-size:0.85em;\">(ex æquo)</span>':''}</td><td>${el?esc(el.nom)+' '+esc(el.prenom):'—'}</td><td><strong>${r.moyenne.toFixed(2)}</strong></td><td>${badgeDecisionBlanc(decision)}</td></tr>`;
   }).join('');
 
   return gestionSessions + `
@@ -2318,7 +2596,7 @@ function renderGrilleBlanc(examenBlancId, classe, matiereId){
 
 /* ---------- Finances ---------- */
 function renderFinances(){
-  const totalPaye = FINANCES.paiements.reduce((s,p)=>s+Number(p.montant||0),0);
+  const totalPaye = FINANCES.paiements.filter(estEncaisse).reduce((s,p)=>s+Number(p.montant||0),0);
   const totalDepenses = FINANCES.depenses.reduce((s,d)=>s+Number(d.montant||0),0);
   const categorieOptions = PARAMS.categoriesDepenses.map(c=>`<option>${esc(c)}</option>`).join('');
 
@@ -2342,7 +2620,7 @@ function renderFinances(){
     <form id="form-depense" class="form-grid">
       <div class="field"><label>Libellé</label><input name="libelle" required placeholder="ex: Fournitures"></div>
       <div class="field"><label>Catégorie</label><select name="categorie">${categorieOptions}</select></div>
-      <div class="field"><label>Montant (FCFA)</label><input name="montant" type="number" min="0" required></div>
+      <div class="field"><label>Montant (FCFA)</label><input name="montant" type="text" inputmode="decimal" placeholder="ex : 15000 ou 1500,50" required></div>
       <div class="field"><label>Date</label><input name="date" type="date" required></div>
       <button class="btn" type="submit">Enregistrer</button>
     </form>
@@ -2374,7 +2652,7 @@ function renderFraisScolariteParClasse(){
     const el = ELEVES.find(e=>e.id===p.eleveId);
     return el && el.classe === classeFinanceTab;
   });
-  const totalClasse = paiementsClasse.reduce((s,p)=>s+Number(p.montant||0),0);
+  const totalClasse = paiementsClasse.filter(estEncaisse).reduce((s,p)=>s+Number(p.montant||0),0);
   const attenduClasse = elevesClasse.reduce((s,e)=>s+Number(e.fraisAnnuel||0),0);
 
   return `
@@ -2393,7 +2671,7 @@ function renderFraisScolariteParClasse(){
     ${elevesClasse.length===0 ? '<p class="muted">Aucun élève dans cette classe.</p>' : `
     <form id="form-paiement" class="form-grid">
       <div class="field"><label>Élève</label><select name="eleveId" required>${eleveOptions}</select></div>
-      <div class="field"><label>Montant (FCFA)</label><input name="montant" type="number" min="0" required></div>
+      <div class="field"><label>Montant (FCFA)</label><input name="montant" type="text" inputmode="decimal" placeholder="ex : 15000 ou 1500,50" required></div>
       <div class="field"><label>Date</label><input name="date" type="date" required></div>
       <div class="field"><label>Statut</label><select name="statut"><option>Payé</option><option>Partiel</option><option>Impayé</option></select></div>
       <button class="btn" type="submit">Enregistrer</button>
@@ -2458,15 +2736,26 @@ function renderSalaires(){
     </div>`}
   </div>
 
+  ${(()=>{
+    const vacatairesPayes = vacataires.filter(p=>entriesMois.some(e=>e.personnelId===p.id && e.type==='Vacation'));
+    const vacatairesNonPayes = vacataires.filter(p=>!vacatairesPayes.includes(p));
+    return `
   <div class="panel">
     <div class="panel-head"><h3>Enseignants Vacataires</h3><p class="desc" style="width:100%;">Payés selon les heures réellement assurées ce mois.</p></div>
     ${vacataires.length===0 ? '<p class="muted">Aucun enseignant Vacataire actif.</p>' : `
+    ${vacatairesPayes.length>0 ? `
+    <table style="margin-bottom:14px;">
+      <thead><tr><th>Enseignant</th><th></th></tr></thead>
+      <tbody>${vacatairesPayes.map(p=>`<tr><td>${esc(p.nom)} ${esc(p.prenom)}</td><td><span class="badge actif">Déjà enregistré ce mois</span></td></tr>`).join('')}</tbody>
+    </table>` : ''}
+    ${vacatairesNonPayes.length>0 ? `
     <form id="form-paie-vacataire" class="form-grid">
-      <div class="field"><label>Enseignant</label><select name="personnelId" required>${vacataires.map(p=>`<option value="${p.id}">${esc(p.nom)} ${esc(p.prenom)}</option>`).join('')}</select></div>
+      <div class="field"><label>Enseignant</label><select name="personnelId" required>${vacatairesNonPayes.map(p=>`<option value="${p.id}">${esc(p.nom)} ${esc(p.prenom)}</option>`).join('')}</select></div>
       <div class="field"><label>Heures assurées ce mois</label><input name="heures" type="number" min="0" step="0.5" required></div>
       <button class="btn" type="submit">Enregistrer</button>
-    </form>`}
-  </div>
+    </form>` : '<p class="muted">Tous les enseignants Vacataires ont déjà été payés ce mois.</p>'}`}
+  </div>`;
+  })()}
 
   <div class="panel">
     <div class="panel-head"><h3>Personnel non-enseignant</h3><p class="desc" style="width:100%;">Salaire fixe défini dans l'onglet Personnel (non modifiable ici).</p></div>
@@ -2710,6 +2999,8 @@ function buildCertificatScolariteHTML(eleveId){
   const naissanceDate = formatDateFrLongue(el.dateNaissance);
   const naissance = (el.dateNaissance || el.lieuNaissance) ?
     ` né(e) le <strong>${naissanceDate || '________________'}</strong> à <strong>${el.lieuNaissance?esc(el.lieuNaissance):'________________'}</strong>,` : '';
+  const filiation = (el.nomPere || el.nomMere) ?
+    ` ${el.sexe==='M'?'fils':el.sexe==='F'?'fille':'enfant'} de <strong>${el.nomPere?esc(el.nomPere):'________________'}</strong> et de <strong>${el.nomMere?esc(el.nomMere):'________________'}</strong>,` : '';
   const today = formatDateFrLongue(new Date().toISOString().slice(0,10));
   const introTexte = esc(PARAMS.certifSoussigneIntro)
     .replace(/\{directeur\}/g, directeurNom?esc(directeurNom):'le '+esc(PARAMS.directeurTitre||'Directeur').toLowerCase())
@@ -2724,7 +3015,7 @@ function buildCertificatScolariteHTML(eleveId){
       <h2>Certificat de scolarité</h2>
       <div class="certificat-corps">
         <p>${introTexte}</p>
-        <p class="certificat-eleve-nom"><strong>${esc(el.nom)} ${esc(el.prenom)}</strong>${naissance}<br>
+        <p class="certificat-eleve-nom"><strong>${esc(el.nom)} ${esc(el.prenom)}</strong>${naissance}${filiation}<br>
         immatriculé(e) sous le numéro <strong>${esc(el.matricule)}</strong>,</p>
         <p>${corpsTexte}</p>
         <p>${formuleFinale}</p>
@@ -2754,13 +3045,15 @@ function buildCertificatNonRedevanceHTML(eleveId){
     ? esc(PARAMS.certifNonRedevanceOk)
     : esc(PARAMS.certifNonRedevanceKo).replace(/\{solde\}/g, `<strong>${fmt(solde)}</strong>`);
   const formuleFinale = esc(PARAMS.certifFormuleFinale);
+  const filiation = (el.nomPere || el.nomMere) ?
+    ` ${el.sexe==='M'?'fils':el.sexe==='F'?'fille':'enfant'} de <strong>${el.nomPere?esc(el.nomPere):'________________'}</strong> et de <strong>${el.nomMere?esc(el.nomMere):'________________'}</strong>,` : '';
   return `
     <div class="certificat">
       ${printHeader()}
       <h2>Certificat de non-redevance</h2>
       <div class="certificat-corps">
         <p>${introTexte}</p>
-        <p class="certificat-eleve-nom"><strong>${esc(el.nom)} ${esc(el.prenom)}</strong>, immatriculé(e) sous le numéro <strong>${esc(el.matricule)}</strong>,
+        <p class="certificat-eleve-nom"><strong>${esc(el.nom)} ${esc(el.prenom)}</strong>,${filiation} immatriculé(e) sous le numéro <strong>${esc(el.matricule)}</strong>,
         inscrit(e) en classe de <strong>${esc(el.classe)}</strong> au titre de l'année scolaire <strong>${anneeLib}</strong>,</p>
         <p>${statutTexte}</p>
         <p>${formuleFinale}</p>
@@ -3385,7 +3678,7 @@ function buildHistoriqueEleveHTML(eleveId){
       <td>${esc(l.annee)}</td>
       <td>${esc(l.classe)}</td>
       <td>${l.moy!==null && l.moy!==undefined ? l.moy.toFixed(2)+'/20' : '—'}</td>
-      <td>${l.rangInfo.rang ? l.rangInfo.rang+' / '+l.rangInfo.effectif : '—'}</td>
+      <td>${l.rangInfo.rang ? l.rangInfo.rang+(l.rangInfo.exAequo?' ex æquo':'')+' / '+l.rangInfo.effectif : '—'}</td>
       <td>${esc(l.decision)}</td>
     </tr>
   `).join('');
@@ -3583,6 +3876,43 @@ function buildClassementAssiduiteHTML(trimestre){
   `;
 }
 
+// Billets vierges à remplir à la main (retards / sorties-rentrées) — 8 billets par page A4,
+// bordure pointillée pour découpe facile. Aucune donnée d'élève n'est pré-remplie : c'est le
+// surveillant/professeur qui les complète manuellement au moment voulu.
+function billetEntreeHTML(schoolName){
+  return `<div class="billet">
+    <div class="billet-titre">${schoolName || 'Établissement'}<br>BILLET D'ENTRÉE EN CLASSE</div>
+    <div class="billet-ligne"><span class="lbl">Nom &amp; prénom :</span><span class="pointille"></span></div>
+    <div class="billet-ligne"><span class="lbl">Classe :</span><span class="pointille" style="max-width:70px;"></span><span class="lbl">Date :</span><span class="pointille" style="max-width:70px;"></span></div>
+    <div class="billet-ligne"><span class="lbl">Heure de rentrée en classe :</span><span class="pointille"></span></div>
+    <div class="billet-ligne"><span class="lbl">Motif du retard :</span><span class="pointille"></span></div>
+    <div class="billet-ligne"><span class="pointille"></span></div>
+    <div class="billet-ligne" style="margin-top:auto;"><span class="lbl">Visa Surveillant général :</span><span class="pointille"></span></div>
+  </div>`;
+}
+function billetSortieHTML(schoolName){
+  return `<div class="billet">
+    <div class="billet-titre">${schoolName || 'Établissement'}<br>BILLET DE SORTIE</div>
+    <div class="billet-ligne"><span class="lbl">Nom &amp; prénom :</span><span class="pointille"></span></div>
+    <div class="billet-ligne"><span class="lbl">Classe :</span><span class="pointille" style="max-width:110px;"></span></div>
+    <div class="billet-ligne"><span class="lbl">Date de sortie :</span><span class="pointille" style="max-width:60px;"></span><span class="lbl">Heure :</span><span class="pointille" style="max-width:50px;"></span></div>
+    <div class="billet-ligne"><span class="lbl">Date de retour prévue :</span><span class="pointille"></span></div>
+    <div class="billet-ligne"><span class="lbl">Motif :</span><span class="pointille"></span></div>
+    <div class="billet-ligne" style="margin-top:auto;"><span class="lbl">Visa Surveillant / Parent :</span><span class="pointille"></span></div>
+  </div>`;
+}
+function buildBilletsPrintHTML(type, nombre){
+  const schoolName = esc(document.getElementById('school-name').value);
+  const genererBillet = type==='entree' ? billetEntreeHTML : billetSortieHTML;
+  const nbPages = Math.max(1, Math.ceil(nombre/8));
+  let pages = '';
+  for(let p=0; p<nbPages; p++){
+    const billets = Array.from({length:8}, ()=>genererBillet(schoolName)).join('');
+    pages += `<div class="billets-page">${billets}</div>`;
+  }
+  return pages;
+}
+
 function renderAbsences(){
   if(ELEVES.length===0) return '<div class="panel"><p class="muted">Ajoutez d\'abord des élèves dans l\'onglet « Élèves ».</p></div>';
   const classesAvecEleves = PARAMS.classes.map(c=>c.nom).filter(nom => ELEVES.some(e=>e.classe===nom));
@@ -3679,6 +4009,15 @@ function renderAbsences(){
   </div>
 
   ${renderClassementAssiduitePanel()}
+
+  <div class="panel">
+    <div class="panel-head"><h3>Billets à remplir à la main</h3></div>
+    <p class="desc" style="width:100%;">Billets vierges (retard / sortie-rentrée) à imprimer, découper et remplir à la main — 8 billets par page A4.</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn secondary small" data-action="print-billets-entree">Imprimer des billets d'entrée en classe</button>
+      <button class="btn secondary small" data-action="print-billets-sortie">Imprimer des billets de sortie</button>
+    </div>
+  </div>
 
   <div class="panel">
     <div class="panel-head">
@@ -3833,8 +4172,17 @@ function buildEmploiDuTempsHTML(classe){
 }
 
 /* ---------- Paramètres ---------- */
+function renderInfosAdmin(){
+  return `
+  <div class="panel">
+    <div class="panel-head"><h3>À propos de ce logiciel</h3></div>
+    <p style="font-size:14px;line-height:1.7;">Ce logiciel a été développé par BAMA Nékilma. Pour tout besoin contacter le 67909051 ou le 70148342. Merci pour votre confiance.</p>
+  </div>
+  `;
+}
+
 function renderParametres(){
-  if(PARAMS.pinVerrouillage && !parametresDeverrouille){
+  if(PARAMS.pinVerrouillageHash && !parametresDeverrouille){
     return `
     <div class="panel" style="max-width:420px;">
       <div class="panel-head"><h3>Paramètres verrouillés</h3><p class="desc" style="width:100%;">Entrez le code pour accéder et modifier les paramètres de l'établissement.</p></div>
@@ -3865,10 +4213,30 @@ function renderParametres(){
         <thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th></th></tr></thead>
         <tbody>${UTILISATEURS.length===0 ? '<tr class="empty-row"><td colspan="4">Aucun compte.</td></tr>' :
           UTILISATEURS.map(u=>`<tr>
-            <td>${esc(u.nom)}</td><td>${esc(u.identifiant)}</td><td>${esc(ROLES[u.role]?.label||u.role)}</td>
+            <td>${esc(u.nom)}</td><td>${esc(u.identifiant)}</td><td>${esc(u.roleLabel||'')}</td>
             <td style="white-space:nowrap;">
+              <button class="btn secondary small" data-action="ouvrir-modifier-compte" data-id="${u.id}">Modifier</button>
               <button class="btn secondary small" data-action="ouvrir-reset-mdp" data-id="${u.id}">Réinitialiser le mot de passe</button>
               <button class="btn danger small" data-action="del-utilisateur" data-id="${u.id}">Supprimer</button>
+            </td>
+          </tr>
+          <tr id="ligne-modifier-${u.id}" style="display:none;">
+            <td colspan="4" style="background:var(--navy-soft);">
+              <form class="form-grid form-modifier-compte" data-id="${u.id}" style="margin:8px 0;">
+                <div class="field"><label>Nom complet</label><input name="nom" value="${esc(u.nom)}" required></div>
+                <div class="field"><label>Identifiant de connexion</label><input name="identifiant" value="${esc(u.identifiant)}" required></div>
+                <div class="field"><label>Intitulé du rôle</label><input name="roleLabel" value="${esc(u.roleLabel||'')}" required></div>
+                <div class="field" style="grid-column:1/-1;">
+                  <label>Onglets accessibles</label>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;">
+                    ${Object.entries(titles).map(([key,t])=>`
+                      <label style="display:flex;align-items:center;gap:5px;font-weight:400;">
+                        <input type="checkbox" name="tabs" value="${key}" ${(u.tabs||[]).includes(key)?'checked':''}> ${esc(t[0])}
+                      </label>`).join('')}
+                  </div>
+                </div>
+                <button class="btn gold" type="submit">Enregistrer les modifications</button>
+              </form>
             </td>
           </tr>
           <tr id="ligne-reset-mdp-${u.id}" style="display:none;">
@@ -3886,11 +4254,21 @@ function renderParametres(){
     <form id="form-utilisateur" class="form-grid" style="margin-top:14px;">
       <div class="field"><label>Nom complet</label><input name="nom" required placeholder="ex: Awa Compaoré"></div>
       <div class="field"><label>Identifiant de connexion</label><input name="identifiant" required placeholder="ex: awa.c"></div>
-      <div class="field"><label>Rôle</label><select name="role">${Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${esc(r.label)}</option>`).join('')}</select></div>
+      <div class="field"><label>Intitulé du rôle (libre)</label><input name="roleLabel" ${UTILISATEURS.length===0?'value="Direction" readonly':'required placeholder="ex: Comptable, Surveillant général, Vie scolaire..."'}></div>
       <div class="field"><label>Mot de passe</label><input name="motDePasse" type="password" required minlength="4"></div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Onglets accessibles à ce compte</label>
+        ${UTILISATEURS.length===0 ? '<p class="muted" style="margin:2px 0 6px 0;">Le tout premier compte doit obligatoirement avoir un accès complet : c\'est le compte Direction qui active le système de comptes.</p>' : ''}
+        <div style="display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;">
+          ${Object.entries(titles).map(([key,t])=>`
+            <label style="display:flex;align-items:center;gap:5px;font-weight:400;">
+              <input type="checkbox" name="tabs" value="${key}" ${UTILISATEURS.length===0?'checked disabled':''}> ${esc(t[0])}
+            </label>`).join('')}
+        </div>
+      </div>
       <button class="btn secondary" type="submit">Créer le compte</button>
     </form>
-    <p class="muted" style="margin-top:8px;"><strong>Direction</strong> : accès complet. <strong>Comptable</strong> : élèves + finances. <strong>Surveillant(e)</strong> : élèves + absences + emploi du temps. <strong>Enseignant(e)</strong> : notes &amp; bulletins uniquement.</p>
+    <p class="muted" style="margin-top:8px;">Le rôle et les onglets accessibles sont définis librement par la Direction à la création de chaque compte, et peuvent être différents pour chaque personne.</p>
   </div>
 
   <div class="panel" style="border-left:4px solid var(--gold);">
@@ -3906,21 +4284,21 @@ function renderParametres(){
   <div class="panel">
     <div class="panel-head"><h3>Verrouillage des paramètres</h3><p class="desc" style="width:100%;">Protégez tous les paramètres de l'établissement (frais, coefficients, barèmes de paie...) par un code. Une fois verrouillé, ce code sera demandé à chaque ouverture de l'onglet Paramètres.</p></div>
     <form id="form-verrouillage" class="form-grid">
-      <div class="field"><label>${PARAMS.pinVerrouillage?'Nouveau code (laisser vide pour ne pas changer)':'Définir un code'}</label><input name="pin" type="password" inputmode="numeric" placeholder="ex: 4 à 6 chiffres"></div>
-      <button class="btn secondary" type="submit">${PARAMS.pinVerrouillage?'Mettre à jour le code':'Activer le verrouillage'}</button>
-      ${PARAMS.pinVerrouillage ? '<button class="btn danger" type="button" id="btn-retirer-verrouillage">Retirer le verrouillage</button>' : ''}
+      <div class="field"><label>${PARAMS.pinVerrouillageHash?'Nouveau code (laisser vide pour ne pas changer)':'Définir un code'}</label><input name="pin" type="password" inputmode="numeric" placeholder="ex: 4 à 6 chiffres"></div>
+      <button class="btn secondary" type="submit">${PARAMS.pinVerrouillageHash?'Mettre à jour le code':'Activer le verrouillage'}</button>
+      ${PARAMS.pinVerrouillageHash ? '<button class="btn danger" type="button" id="btn-retirer-verrouillage">Retirer le verrouillage</button>' : ''}
     </form>
-    ${PARAMS.pinVerrouillage ? '<button class="btn secondary small" id="btn-verrouiller-maintenant" style="margin-top:10px;">Verrouiller maintenant</button>' : ''}
+    ${PARAMS.pinVerrouillageHash ? '<button class="btn secondary small" id="btn-verrouiller-maintenant" style="margin-top:10px;">Verrouiller maintenant</button>' : ''}
   </div>
 
   <div class="panel" style="border-left:4px solid var(--red);">
     <div class="panel-head"><h3>Sécurité des suppressions</h3><p class="desc" style="width:100%;">Ce code sera demandé avant CHAQUE suppression et CHAQUE réinitialisation dans le logiciel (élèves, notes, finances, personnel, années archivées...), pour que seule une personne autorisée puisse le faire. Différent du code de verrouillage ci-dessus.</p></div>
     <form id="form-code-suppression" class="form-grid">
-      <div class="field"><label>${PARAMS.codeSuppression?'Nouveau code (laisser vide pour ne pas changer)':'Définir un code de suppression'}</label><input name="code" type="password" placeholder="ex: 4 à 8 caractères"></div>
-      <button class="btn secondary" type="submit">${PARAMS.codeSuppression?'Mettre à jour le code':'Activer la protection'}</button>
-      ${PARAMS.codeSuppression ? '<button class="btn danger" type="button" id="btn-retirer-code-suppression">Retirer la protection</button>' : ''}
+      <div class="field"><label>${PARAMS.codeSuppressionHash?'Nouveau code (laisser vide pour ne pas changer)':'Définir un code de suppression'}</label><input name="code" type="password" placeholder="ex: 4 à 8 caractères"></div>
+      <button class="btn secondary" type="submit">${PARAMS.codeSuppressionHash?'Mettre à jour le code':'Activer la protection'}</button>
+      ${PARAMS.codeSuppressionHash ? '<button class="btn danger" type="button" id="btn-retirer-code-suppression">Retirer la protection</button>' : ''}
     </form>
-    ${!PARAMS.codeSuppression ? '<p class="muted" style="margin-top:8px;color:var(--red);">⚠ Tant qu\'aucun code n\'est défini, les suppressions et réinitialisations sont bloquées.</p>' : ''}
+    ${!PARAMS.codeSuppressionHash ? '<p class="muted" style="margin-top:8px;color:var(--red);">⚠ Tant qu\'aucun code n\'est défini, les suppressions et réinitialisations sont bloquées.</p>' : ''}
   </div>
 
   <div class="panel">
@@ -4180,21 +4558,27 @@ function renderParametres(){
   ${renderListEditor('Catégories de matières', 'categoriesMatieres', "Utilisées pour classer les matières (littéraire, scientifique, sport...) et calculer les sous-moyennes du bulletin.")}
 
   <div class="panel">
-    <div class="panel-head"><h3>Classes et frais de scolarité annuels</h3><p class="desc" style="width:100%;">Le frais annuel sert de valeur par défaut lors de l'inscription d'un élève (modifiable par élève).</p></div>
+    <div class="panel-head"><h3>Classes et frais de scolarité annuels</h3><p class="desc" style="width:100%;">Deux tarifs par classe selon le statut d'affectation de l'élève. Sert de valeur par défaut lors de l'inscription (modifiable par élève).</p></div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Classe</th><th>Frais annuel par défaut</th><th>Professeur principal</th><th></th></tr></thead>
+        <thead><tr><th>Classe</th><th>Frais « Affecté »</th><th>Frais « Non affecté »</th><th>Professeur principal</th><th></th></tr></thead>
         <tbody>
-        ${PARAMS.classes.length===0 ? '<tr class="empty-row"><td colspan="4">Aucune classe configurée.</td></tr>' :
-          PARAMS.classes.map(c=>`<tr><td>${esc(c.nom)}</td><td>${fmt(c.fraisAnnuel)}</td>
+        ${PARAMS.classes.length===0 ? '<tr class="empty-row"><td colspan="5">Aucune classe configurée.</td></tr>' :
+          PARAMS.classes.map(c=>`<tr><td>${esc(c.nom)}</td>
+            <td><input type="number" min="0" class="inline-num" style="width:110px;" data-action="edit-frais-classe" data-id="${c.id}" data-champ="fraisAffecte" value="${Number(c.fraisAffecte||0)}"></td>
+            <td><input type="number" min="0" class="inline-num" style="width:110px;" data-action="edit-frais-classe" data-id="${c.id}" data-champ="fraisNonAffecte" value="${Number(c.fraisNonAffecte||0)}"></td>
             <td><input class="inline-num" style="width:170px;" data-action="edit-prof-principal" data-classe="${esc(c.nom)}" value="${esc(PROF_PRINCIPAL[c.nom]||'')}" placeholder="Nom du professeur"></td>
-            <td><button class="btn danger small" data-action="del-classe" data-id="${c.id}">Supprimer</button></td></tr>`).join('')}
+            <td style="white-space:nowrap;">
+              <button class="btn secondary small" data-action="renommer-classe" data-id="${c.id}">Renommer</button>
+              <button class="btn danger small" data-action="del-classe" data-id="${c.id}">Supprimer</button>
+            </td></tr>`).join('')}
         </tbody>
       </table>
     </div>
     <form id="form-classe" class="form-grid" style="margin-top:14px;">
       <div class="field"><label>Nom de la classe</label><input name="nom" required placeholder="ex: 3ème B"></div>
-      <div class="field"><label>Frais annuel (FCFA)</label><input name="fraisAnnuel" type="number" min="0" required></div>
+      <div class="field"><label>Frais « Affecté » (FCFA)</label><input name="fraisAffecte" type="number" min="0" required></div>
+      <div class="field"><label>Frais « Non affecté » (FCFA)</label><input name="fraisNonAffecte" type="number" min="0" required></div>
       <button class="btn gold" type="submit">Ajouter la classe</button>
     </form>
   </div>
@@ -4370,9 +4754,30 @@ function renderCreneauxEditor(){
 }
 
 /* ---------- Print builders ---------- */
+// Affiche un aperçu à l'écran du document avant impression, pour que l'utilisateur
+// puisse vérifier le contenu et annuler si besoin, plutôt que d'ouvrir directement
+// la boîte de dialogue d'impression.
 function openPrint(html){
-  document.getElementById('print-area').innerHTML = html;
-  window.print();
+  const root = document.getElementById('print-preview-root');
+  root.innerHTML = `
+    <div class="print-preview-backdrop" id="print-preview-backdrop">
+      <div class="print-preview-toolbar">
+        <span>Aperçu avant impression</span>
+        <button class="btn secondary small" id="print-preview-close" type="button">Fermer</button>
+        <button class="btn small" id="print-preview-go" type="button">Imprimer</button>
+      </div>
+      <div class="print-preview-page">${html}</div>
+    </div>`;
+  const close = ()=>{ root.innerHTML=''; };
+  document.getElementById('print-preview-close').addEventListener('click', close);
+  document.getElementById('print-preview-backdrop').addEventListener('click', (e)=>{
+    if(e.target.id==='print-preview-backdrop') close();
+  });
+  document.getElementById('print-preview-go').addEventListener('click', ()=>{
+    document.getElementById('print-area').innerHTML = html;
+    window.print();
+  });
+  window.addEventListener('afterprint', close, {once:true});
 }
 
 // Export CSV (compatible Excel/LibreOffice) — aucune dépendance externe.
@@ -4447,14 +4852,29 @@ function buildPersonnelCategorieListHTML(fonction){
 function buildClasseElevesListHTML(classe){
   const schoolName = esc(document.getElementById('school-name').value);
   const eleves = ELEVES.filter(e=>e.classe===classe);
-  const rows = eleves.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.matricule)||'—'}</td><td>${esc(e.nom)}</td><td>${esc(e.prenom)}</td><td>${esc(e.sexe)}</td><td>${esc(e.contact)||'—'}</td><td>${esc(e.statut)}</td></tr>`).join('');
+  const rows = eleves.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.matricule)||'—'}</td><td>${esc(e.nom)}</td><td>${esc(e.prenom)}</td><td>${esc(e.sexe)}</td><td>${esc(e.contact)||'—'}</td><td>${esc(e.statutAffectation)||'—'}</td><td>${esc(e.statutSport)||'Apte'}</td><td>${esc(e.statut)}</td></tr>`).join('');
   return `
     <div class="bulletin" style="max-width:700px;">
       ${printHeader()}
       <h3>Liste des élèves — ${esc(classe)} (${eleves.length})</h3>
       <table class="receipt-table">
-        <thead><tr><th>N°</th><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Contact parent</th><th>Statut</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="7">Aucun élève.</td></tr>'}</tbody>
+        <thead><tr><th>N°</th><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Contact parent</th><th>Affectation</th><th>Sport</th><th>Statut</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="9">Aucun élève.</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function buildListeDispensesSportHTML(classe){
+  const eleves = ELEVES.filter(e=>e.classe===classe && e.statutSport==='Dispensé');
+  const rows = eleves.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.nom)} ${esc(e.prenom)}</td><td>${esc(e.motifDispenseSport)||'—'}</td></tr>`).join('');
+  return `
+    <div class="bulletin" style="max-width:700px;">
+      ${printHeader()}
+      <h3>Liste des élèves dispensés de sport — ${esc(classe)} (${eleves.length})</h3>
+      <table class="receipt-table">
+        <thead><tr><th>N°</th><th>Élève</th><th>Motif</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="3">Aucun élève dispensé dans cette classe.</td></tr>'}</tbody>
       </table>
     </div>
   `;
@@ -4538,10 +4958,11 @@ function buildBulletinHTML(eleveId, trimestre){
 
   const rangChips = [
     statChip('Moyenne du trimestre', data.moyenneGenerale!==null?data.moyenneGenerale.toFixed(2)+'/20':'—', true),
-    statChip('Rang', classement.rang?classement.rang+' / '+classement.effectif:'—'),
+    statChip('Rang', classement.rang?classement.rang+(classement.exAequo?' ex æquo':'')+' / '+classement.effectif:'—'),
     statChip('Moyenne de la classe', classement.moyenneClasse!==null?classement.moyenneClasse.toFixed(2)+'/20':'—'),
     statChip('Plus forte moyenne', classement.forte!==null?classement.forte.toFixed(2)+'/20':'—'),
-    statChip('Plus faible moyenne', classement.faible!==null?classement.faible.toFixed(2)+'/20':'—')
+    statChip('Plus faible moyenne', classement.faible!==null?classement.faible.toFixed(2)+'/20':'—'),
+    statChip('Sport', el.statutSport==='Dispensé' ? `Dispensé${el.motifDispenseSport?' ('+esc(el.motifDispenseSport)+')':''}` : 'Apte')
   ].join('');
 
   const aDesReductions = data.reductionConduite>0 || data.reductionAbsence>0;
@@ -4576,7 +4997,7 @@ function buildBulletinHTML(eleveId, trimestre){
       <div class="bulletin-subhead">Bilan annuel</div>
       <div class="stat-row">
         ${statChip('Moyenne annuelle', moyAn!==null?moyAn.toFixed(2)+'/20':'—', true)}
-        ${statChip('Rang annuel', classAn.rang?classAn.rang+' / '+classAn.effectif:'—')}
+        ${statChip('Rang annuel', classAn.rang?classAn.rang+(classAn.exAequo?' ex æquo':'')+' / '+classAn.effectif:'—')}
         ${statChip('Moy. classe annuelle', classAn.moyenneClasse!==null?classAn.moyenneClasse.toFixed(2)+'/20':'—')}
         ${statChip('Forte moy. annuelle', classAn.forte!==null?classAn.forte.toFixed(2)+'/20':'—')}
         ${statChip('Faible moy. annuelle', classAn.faible!==null?classAn.faible.toFixed(2)+'/20':'—')}
@@ -4644,7 +5065,7 @@ function buildGrilleNotesPrintHTML(classe, matiereId, trimestre){
       <td>${c.moyDevoirs!==null?c.moyDevoirs.toFixed(2):'—'}</td>
       <td>${c.comp!==null?c.comp:'—'}</td>
       <td><strong>${c.moyenne!==null?c.moyenne.toFixed(2):'—'}</strong></td>
-      <td>${rangEntry?rangEntry.rang+'e':'—'}</td></tr>`;
+      <td>${rangEntry?rangEntry.rang+'e'+(rangEntry.exAequo?' ex æquo':''):'—'}</td></tr>`;
   }).join('');
   return `
     <div class="bulletin" style="max-width:780px;">
@@ -4654,6 +5075,41 @@ function buildGrilleNotesPrintHTML(classe, matiereId, trimestre){
       <table class="receipt-table">
         <thead><tr><th>Élève</th><th>Devoir 1</th><th>Devoir 2</th><th>Moy. dev.</th><th>Composition</th><th>Moyenne</th><th>Rang (matière)</th></tr></thead>
         <tbody>${rows || '<tr><td colspan="7">Aucun élève.</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Fiche récapitulative générale : moyenne et rang de CHAQUE matière pour CHAQUE élève de la
+// classe sur une seule fiche, plus la moyenne trimestrielle et le rang général — destinée au
+// professeur principal pour vérifier toutes les notes de tous les élèves en une seule fois.
+function buildFicheRecapGeneraleClassePrintHTML(classe, trimestre){
+  const matieres = matieresPourClasse(classe);
+  const eleves = ELEVES.filter(e=>e.classe===classe).sort((a,b)=>a.nom.localeCompare(b.nom));
+  const clGenerale = classementClasse(classe, trimestre);
+  const classementsMatieres = matieres.map(m=>classementParMatiere(classe, m.id, trimestre));
+  const rows = eleves.map(e=>{
+    const cellsMatieres = matieres.map((m,i)=>{
+      const n = NOTES.find(x=>x.eleveId===e.id && x.matiereId===m.id && x.trimestre===trimestre);
+      const moyenne = n ? moyenneMatiere(n).moyenne : null;
+      const rangEntry = classementsMatieres[i].classement.find(r=>r.eleveId===e.id);
+      if(moyenne===null) return '<td>—</td>';
+      return `<td>${moyenne.toFixed(2)}${rangEntry?' <span style="color:var(--ink-soft);">('+rangEntry.rang+'e)</span>':''}</td>`;
+    }).join('');
+    const t = computeTrimestre(e.id, trimestre);
+    const rangGeneral = clGenerale.classement.find(r=>r.eleveId===e.id);
+    return `<tr><td style="text-align:left;">${esc(e.nom)} ${esc(e.prenom)}</td>${cellsMatieres}
+      <td><strong>${t.moyenneGenerale!==null?t.moyenneGenerale.toFixed(2):'—'}</strong></td>
+      <td>${rangGeneral?rangGeneral.rang+'e'+(rangGeneral.exAequo?' ex æquo':''):'—'}</td></tr>`;
+  }).join('');
+  return `
+    <div class="bulletin" style="max-width:100%;">
+      ${printHeader()}
+      <h3>Fiche récapitulative générale — ${esc(classe)} — ${esc(trimestre)}</h3>
+      <p class="bulletin-eleve-line">Toutes matières · moyenne et rang par matière entre parenthèses</p>
+      <table class="receipt-table" style="font-size:9.5px;">
+        <thead><tr><th style="text-align:left;">Élève</th>${matieres.map(m=>`<th>${esc(m.nom)}</th>`).join('')}<th>Moy. trim.</th><th>Rang</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="${matieres.length+3}">Aucun élève.</td></tr>`}</tbody>
       </table>
     </div>
   `;
@@ -4672,7 +5128,7 @@ function buildFicheResultatsTrimestrePrintHTML(classe, trimestre){
       <td>${t.totalCoeff>0?t.totalPointsAjuste.toFixed(2):'—'}</td>
       <td>${t.totalCoeff>0?t.totalCoeff:'—'}</td>
       <td><strong>${t.moyenneGenerale!==null?t.moyenneGenerale.toFixed(2):'—'}</strong></td>
-      <td>${rangEntry?rangEntry.rang+'e':'—'}</td></tr>`;
+      <td>${rangEntry?rangEntry.rang+'e'+(rangEntry.exAequo?' ex æquo':''):'—'}</td></tr>`;
   }).join('');
   return `
     <div class="bulletin" style="max-width:780px;">
@@ -4715,7 +5171,7 @@ function buildClassementBlancPrintHTML(classe, examenBlancId){
   const classement = classementExamenBlanc(classe, examenBlancId);
   const rows = classement.classement.map(r=>{
     const el = ELEVES.find(e=>e.id===r.eleveId);
-    return `<tr><td>${r.rang}</td><td>${el?esc(el.nom)+' '+esc(el.prenom):'—'}</td><td><strong>${r.moyenne.toFixed(2)}</strong></td></tr>`;
+    return `<tr><td>${r.rang}${r.exAequo?' <span style=\"font-size:0.85em;\">(ex æquo)</span>':''}</td><td>${el?esc(el.nom)+' '+esc(el.prenom):'—'}</td><td><strong>${r.moyenne.toFixed(2)}</strong></td></tr>`;
   }).join('');
   return `
     <div class="bulletin" style="max-width:700px;">
@@ -4776,8 +5232,8 @@ function attachHandlers(){
     btn.addEventListener('click', ()=>{
       const classe = btn.dataset.classe;
       const eleves = ELEVES.filter(e=>e.classe===classe);
-      const lignes = eleves.map(e=>[e.matricule, e.nom, e.prenom, e.sexe, e.contact, e.statut, e.fraisAnnuel, totalPayeParEleve(e.id)]);
-      exportCSV(`eleves_${classe}`, ['Matricule','Nom','Prénom','Sexe','Contact','Statut','Frais annuel','Payé'], lignes);
+      const lignes = eleves.map(e=>[e.matricule, e.nom, e.prenom, e.sexe, e.contact, e.statutAffectation||'', e.anneeEnregistrement||'', e.statutSport||'Apte', e.statut, e.fraisAnnuel, totalPayeParEleve(e.id)]);
+      exportCSV(`eleves_${classe}`, ['Matricule','Nom','Prénom','Sexe','Contact','Statut affectation','Année enregistrement','Sport','Statut','Frais annuel','Payé'], lignes);
     });
   });
   document.querySelectorAll('[data-action="export-csv-paiements-classe"]').forEach(btn=>{
@@ -4805,21 +5261,54 @@ function attachHandlers(){
   });
 
   if(currentTab==='eleves'){
-    document.getElementById('new-eleve-classe')?.addEventListener('change', (e)=>{
-      const opt = e.target.selectedOptions[0];
-      const frais = opt ? opt.dataset.frais : 0;
+    const majFraisSuggere = ()=>{
+      const opt = document.getElementById('new-eleve-classe')?.selectedOptions[0];
+      const affectation = document.getElementById('new-eleve-affectation')?.value;
       const fraisInput = document.getElementById('new-eleve-frais');
-      if(fraisInput) fraisInput.value = frais || 0;
-    });
-    document.getElementById('new-eleve-classe')?.dispatchEvent(new Event('change'));
+      if(!opt || !fraisInput) return;
+      const frais = affectation==='Affecté' ? opt.dataset.fraisAffecte : opt.dataset.fraisNonAffecte;
+      fraisInput.value = frais || 0;
+    };
+    document.getElementById('new-eleve-classe')?.addEventListener('change', majFraisSuggere);
+    document.getElementById('new-eleve-affectation')?.addEventListener('change', majFraisSuggere);
+    majFraisSuggere();
 
     document.getElementById('form-eleve')?.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const f = new FormData(e.target);
-      ELEVES.push({ id: uid(), matricule: (f.get('matricule')||'').trim(), nom: f.get('nom'), prenom: f.get('prenom'), classe: f.get('classe'),
+      const matricule = (f.get('matricule')||'').trim();
+      const nom = (f.get('nom')||'').trim();
+      const prenom = (f.get('prenom')||'').trim();
+      const dateNaissance = f.get('dateNaissance')||'';
+
+      // Contrôle de doublon : matricule déjà attribué à un autre élève (le matricule est censé
+      // être un identifiant unique délivré par l'établissement).
+      if(matricule){
+        const doublonMatricule = ELEVES.find(x=>x.matricule && x.matricule.trim().toLowerCase()===matricule.toLowerCase());
+        if(doublonMatricule){
+          alert(`Le matricule « ${matricule} » est déjà attribué à ${doublonMatricule.nom} ${doublonMatricule.prenom} (classe ${doublonMatricule.classe}).\n\nChoisissez un matricule différent.`);
+          return;
+        }
+      }
+      // Avertissement (non bloquant) : élève déjà inscrit avec le même nom, prénom et date de
+      // naissance — peut être une double saisie accidentelle, ou bien deux élèves distincts
+      // (homonymes, jumeaux...), donc on laisse la personne décider.
+      if(nom && prenom && dateNaissance){
+        const doublonEleve = ELEVES.find(x=>
+          (x.nom||'').trim().toLowerCase()===nom.toLowerCase() &&
+          (x.prenom||'').trim().toLowerCase()===prenom.toLowerCase() &&
+          x.dateNaissance===dateNaissance);
+        if(doublonEleve && !confirm(`Un élève du nom de ${nom} ${prenom} (même date de naissance) est déjà inscrit en classe de ${doublonEleve.classe}.\n\nVoulez-vous quand même ajouter cette nouvelle fiche ?`)) return;
+      }
+
+      ELEVES.push({ id: uid(), matricule, nom: f.get('nom'), prenom: f.get('prenom'), classe: f.get('classe'),
         sexe: f.get('sexe'), dateNaissance: f.get('dateNaissance')||'', lieuNaissance: f.get('lieuNaissance')||'',
+        nomPere: f.get('nomPere')||'', nomMere: f.get('nomMere')||'',
         contact: f.get('contact'), profession: f.get('profession')||'', contactUrgenceNom: f.get('contactUrgenceNom')||'',
         contactUrgenceTelephone: f.get('contactUrgenceTelephone')||'',
+        statutAffectation: f.get('statutAffectation')||'Non affecté',
+        statutSport: f.get('statutSport')||'Apte', motifDispenseSport: '',
+        anneeEnregistrement: (f.get('anneeEnregistrement')||'').trim(),
         fraisAnnuel: Number(f.get('fraisAnnuel'))||0, statut: f.get('statut'),
         aDejaRedouble: f.get('aDejaRedouble')==='1' });
       await saveEleves();
@@ -4839,14 +5328,40 @@ function attachHandlers(){
     });
 
     document.getElementById('content').addEventListener('click', async (e)=>{
+      const changerClasseBtn = e.target.closest('[data-action="changer-classe-eleve"]');
+      if(changerClasseBtn){
+        const el = ELEVES.find(x=>x.id===changerClasseBtn.dataset.id);
+        if(!el) return;
+        const classesDispo = PARAMS.classes.map(c=>c.nom).filter(nom=>nom!==el.classe);
+        if(classesDispo.length===0){ alert("Aucune autre classe configurée vers laquelle déplacer cet élève."); return; }
+        const nouvelleClasse = await demanderChoix(`Déplacer ${el.nom} ${el.prenom} (actuellement en ${el.classe}) vers :`, classesDispo);
+        if(!nouvelleClasse) return;
+        el.classe = nouvelleClasse;
+        await saveEleves();
+        // Rappel non bloquant : le frais annuel n'est PAS modifié automatiquement (certains
+        // élèves ont un tarif particulier — bourse, accord...), donc on rappelle juste le tarif
+        // de la classe de destination pour que ce ne soit pas oublié si un ajustement est voulu.
+        const classeCible = PARAMS.classes.find(c=>c.nom===nouvelleClasse);
+        if(classeCible){
+          const tarifSuggere = el.statutAffectation==='Affecté' ? classeCible.fraisAffecte : classeCible.fraisNonAffecte;
+          showToast(`${el.nom} ${el.prenom} déplacé(e) en ${nouvelleClasse} — frais actuel : ${fmt(el.fraisAnnuel)} (tarif ${esc(el.statutAffectation||'Non affecté')} de ${nouvelleClasse} : ${fmt(tarifSuggere)})`);
+        } else {
+          showToast(`${el.nom} ${el.prenom} déplacé(e) en ${nouvelleClasse}`);
+        }
+        render();
+        return;
+      }
       const delBtn = e.target.closest('[data-action="del-eleve"]');
       if(delBtn){
         if(!(await confirmerAvecCode('Supprimer définitivement cet élève et toutes ses données (notes, paiements) ?'))) return;
         ELEVES = ELEVES.filter(x=>x.id!==delBtn.dataset.id);
+        await imageDBSet('photo-'+delBtn.dataset.id, null);
         await saveEleves(); showToast('Élève supprimé'); render(); return;
       }
       const printListe = e.target.closest('[data-action="print-classe-eleves"]');
       if(printListe){ openPrint(buildClasseElevesListHTML(printListe.dataset.classe)); return; }
+      const printDispenses = e.target.closest('[data-action="print-dispenses-sport"]');
+      if(printDispenses){ openPrint(buildListeDispensesSportHTML(printDispenses.dataset.classe)); return; }
       const printImpayes = e.target.closest('[data-action="print-classe-impayes"]');
       if(printImpayes){ openPrint(buildClasseImpayesListHTML(printImpayes.dataset.classe)); return; }
     });
@@ -4873,6 +5388,18 @@ function attachHandlers(){
       if(curgTelInput){
         const el = ELEVES.find(x=>x.id===curgTelInput.dataset.id);
         if(el){ el.contactUrgenceTelephone = curgTelInput.value; await saveEleves(); }
+        return;
+      }
+      const sportSelect = e.target.closest('[data-action="edit-statut-sport"]');
+      if(sportSelect){
+        const el = ELEVES.find(x=>x.id===sportSelect.dataset.id);
+        if(el){ el.statutSport = sportSelect.value; if(el.statutSport!=='Dispensé') el.motifDispenseSport=''; await saveEleves(); render(); }
+        return;
+      }
+      const motifSportInput = e.target.closest('[data-action="edit-motif-sport"]');
+      if(motifSportInput){
+        const el = ELEVES.find(x=>x.id===motifSportInput.dataset.id);
+        if(el){ el.motifDispenseSport = motifSportInput.value; await saveEleves(); }
         return;
       }
       const photoInput = e.target.closest('.input-photo-eleve');
@@ -4911,10 +5438,24 @@ function attachHandlers(){
     });
     document.getElementById('btn-save-discipline')?.addEventListener('click', async ()=>{
       const trimestre = PARAMS.trimestres[trimestreTab];
+      const SEUIL_INHABITUEL = 10;
+      const alertes = [];
+      const lignes = [];
       document.querySelectorAll('#tbody-discipline tr').forEach(tr=>{
         const eleveId = tr.dataset.eleveId;
         const conduite = Number(tr.querySelector('.input-reduc-conduite').value)||0;
         const absence = Number(tr.querySelector('.input-reduc-absence').value)||0;
+        if(conduite>SEUIL_INHABITUEL || absence>SEUIL_INHABITUEL){
+          const el = ELEVES.find(e=>e.id===eleveId);
+          alertes.push(`${el?el.nom+' '+el.prenom:eleveId} (conduite: ${conduite}, absence: ${absence})`);
+        }
+        lignes.push({ eleveId, conduite, absence });
+      });
+      // Avertissement (non bloquant) : une réduction inhabituellement élevée est souvent une
+      // faute de frappe (ex. "50" au lieu de "5") qui peut faire chuter une moyenne trimestrielle
+      // de façon spectaculaire — mais une réduction importante peut aussi être légitime.
+      if(alertes.length>0 && !confirm(`Réduction(s) inhabituellement élevée(s) (plus de ${SEUIL_INHABITUEL} points) :\n\n${alertes.join('\n')}\n\nEnregistrer quand même ?`)) return;
+      lignes.forEach(({eleveId, conduite, absence})=>{
         if(!DISCIPLINE[eleveId]) DISCIPLINE[eleveId] = {};
         if(conduite>0 || absence>0) DISCIPLINE[eleveId][trimestre] = { conduite, absence };
         else delete DISCIPLINE[eleveId][trimestre];
@@ -4965,16 +5506,17 @@ function attachHandlers(){
     document.getElementById('btn-save-grille-blanc')?.addEventListener('click', async (e)=>{
       const btn = e.target;
       const classe = btn.dataset.classe, matiereId = btn.dataset.matiere, examenBlancId = btn.dataset.blanc;
-      const toVal = v => (v===''||v===null) ? null : Number(v);
+      let nbCorrections = 0;
       document.querySelectorAll('#grille-blanc-table tbody tr[data-eleve-id]').forEach(row=>{
         const eleveId = row.dataset.eleveId;
-        const note = toVal(row.querySelector('[data-field="note"]').value);
+        const { valeur: note, corrigee } = parseNoteBornee(row.querySelector('[data-field="note"]').value);
+        if(corrigee) nbCorrections++;
         let existing = NOTES_BLANC.find(n=>n.eleveId===eleveId && n.matiereId===matiereId && n.examenBlancId===examenBlancId);
         if(existing){ existing.note = note; }
         else if(note!==null){ NOTES_BLANC.push({id:uid(), eleveId, matiereId, examenBlancId, note}); }
       });
       await saveNotesBlanc();
-      showToast('Notes enregistrées pour la classe');
+      showToast(nbCorrections>0 ? `Notes enregistrées — ${nbCorrections} valeur(s) hors de 0-20 ramenée(s) à la borne` : 'Notes enregistrées pour la classe');
       render();
     });
 
@@ -5034,18 +5576,20 @@ function attachHandlers(){
     document.getElementById('btn-save-grille')?.addEventListener('click', async (e)=>{
       const btn = e.target;
       const classe = btn.dataset.classe, matiereId = btn.dataset.matiere, trimestre = btn.dataset.trimestre;
-      const toVal = v => (v===''||v===null) ? null : Number(v);
+      let nbCorrections = 0;
       document.querySelectorAll('#grille-notes-table tbody tr[data-eleve-id]').forEach(row=>{
         const eleveId = row.dataset.eleveId;
-        const d1 = toVal(row.querySelector('[data-field="devoir1"]').value);
-        const d2 = toVal(row.querySelector('[data-field="devoir2"]').value);
-        const comp = toVal(row.querySelector('[data-field="composition"]').value);
+        const nD1 = parseNoteBornee(row.querySelector('[data-field="devoir1"]').value);
+        const nD2 = parseNoteBornee(row.querySelector('[data-field="devoir2"]').value);
+        const nComp = parseNoteBornee(row.querySelector('[data-field="composition"]').value);
+        const d1 = nD1.valeur, d2 = nD2.valeur, comp = nComp.valeur;
+        if(nD1.corrigee || nD2.corrigee || nComp.corrigee) nbCorrections++;
         let existing = NOTES.find(n=>n.eleveId===eleveId && n.matiereId===matiereId && n.trimestre===trimestre);
         if(existing){ existing.devoir1=d1; existing.devoir2=d2; existing.composition=comp; }
         else if(d1!==null || d2!==null || comp!==null){ NOTES.push({id:uid(), eleveId, matiereId, trimestre, devoir1:d1, devoir2:d2, composition:comp}); }
       });
       await saveNotes();
-      showToast('Notes enregistrées pour la classe');
+      showToast(nbCorrections>0 ? `Notes enregistrées — ${nbCorrections} valeur(s) hors de 0-20 ramenée(s) à la borne` : 'Notes enregistrées pour la classe');
       render();
     });
 
@@ -5057,6 +5601,11 @@ function attachHandlers(){
     document.querySelector('[data-action="print-fiche-resultats-trimestre"]')?.addEventListener('click', (e)=>{
       const d = e.target.dataset;
       openPrint(buildFicheResultatsTrimestrePrintHTML(d.classe, d.trimestre));
+    });
+
+    document.querySelector('[data-action="print-fiche-recap-generale"]')?.addEventListener('click', (e)=>{
+      const d = e.target.dataset;
+      openPrint(buildFicheRecapGeneraleClassePrintHTML(d.classe, d.trimestre));
     });
 
     document.getElementById('btn-print-classe-bulletins')?.addEventListener('click', (e)=>{
@@ -5118,7 +5667,9 @@ function attachHandlers(){
     document.getElementById('form-paiement')?.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const f = new FormData(e.target);
-      FINANCES.paiements.push({ id: uid(), eleveId: f.get('eleveId'), montant: f.get('montant'),
+      const montant = parseMontant(f.get('montant'));
+      if(montant===null || montant===0){ alert('Montant invalide. Utilisez un nombre positif (virgule ou point pour les décimales).'); return; }
+      FINANCES.paiements.push({ id: uid(), eleveId: f.get('eleveId'), montant,
         date: f.get('date'), statut: f.get('statut') });
       await saveFinances();
       showToast('Paiement enregistré');
@@ -5127,8 +5678,10 @@ function attachHandlers(){
     document.getElementById('form-depense')?.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const f = new FormData(e.target);
+      const montant = parseMontant(f.get('montant'));
+      if(montant===null || montant===0){ alert('Montant invalide. Utilisez un nombre positif (virgule ou point pour les décimales).'); return; }
       FINANCES.depenses.push({ id: uid(), libelle: f.get('libelle'), categorie: f.get('categorie'),
-        montant: f.get('montant'), date: f.get('date') });
+        montant, date: f.get('date') });
       await saveFinances();
       showToast('Dépense enregistrée');
       render();
@@ -5183,7 +5736,13 @@ function attachHandlers(){
     document.getElementById('form-paie-vacataire')?.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const f = new FormData(e.target);
-      const entry = { id: uid(), mois: paieMoisSelectionne, personnelId: f.get('personnelId'), type:'Vacation', heures: Number(f.get('heures'))||0 };
+      const personnelId = f.get('personnelId');
+      if(PAIE.some(p=>p.mois===paieMoisSelectionne && p.personnelId===personnelId && p.type==='Vacation')){
+        alert('Ce salaire a déjà été enregistré ce mois pour cet enseignant.');
+        render();
+        return;
+      }
+      const entry = { id: uid(), mois: paieMoisSelectionne, personnelId, type:'Vacation', heures: Number(f.get('heures'))||0 };
       const calc = calculSalaire(entry);
       PAIE.push({ ...entry, ...calc });
       await savePaie();
@@ -5224,7 +5783,15 @@ function attachHandlers(){
       const f = new FormData(e.target);
       const fonction = f.get('fonction');
       const estEnseignant = fonction==='Enseignant';
-      PERSONNEL.push({ id: uid(), nom: f.get('nom'), prenom: f.get('prenom'), matricule: (f.get('matricule')||'').trim(), fonction,
+      const matricule = (f.get('matricule')||'').trim();
+      if(matricule){
+        const doublon = PERSONNEL.find(p=>p.matricule && p.matricule.trim().toLowerCase()===matricule.toLowerCase());
+        if(doublon){
+          alert(`Le matricule « ${matricule} » est déjà attribué à ${doublon.nom} ${doublon.prenom} (${doublon.fonction}).\n\nChoisissez un matricule différent.`);
+          return;
+        }
+      }
+      PERSONNEL.push({ id: uid(), nom: f.get('nom'), prenom: f.get('prenom'), matricule, fonction,
         matiere: estEnseignant ? f.get('matiere') : '',
         typePersonnel: estEnseignant ? f.get('typePersonnel') : '',
         niveauEnseignement: (estEnseignant && f.get('typePersonnel')==='Permanent') ? f.get('niveauEnseignement') : '',
@@ -5237,6 +5804,18 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-personnel"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
+        const membre = PERSONNEL.find(x=>x.id===btn.dataset.id);
+        if(membre){
+          const nbCreneaux = EMPLOI.filter(ev=>ev.personnelId===membre.id).length;
+          const classesProfPrincipal = Object.keys(PROF_PRINCIPAL).filter(cl=>PROF_PRINCIPAL[cl]===`${membre.nom} ${membre.prenom}`);
+          if(nbCreneaux>0 || classesProfPrincipal.length>0){
+            const details = [
+              nbCreneaux>0 ? `${nbCreneaux} créneau(x) dans l'emploi du temps` : null,
+              classesProfPrincipal.length>0 ? `professeur principal de : ${classesProfPrincipal.join(', ')}` : null
+            ].filter(Boolean).join(' ; ');
+            if(!confirm(`${membre.nom} ${membre.prenom} est encore référencé(e) ailleurs (${details}).\n\nCes créneaux/rôles ne seront PAS automatiquement retirés et afficheront un nom qui n'existe plus.\n\nSupprimer quand même ?`)) return;
+          }
+        }
         if(!(await confirmerAvecCode('Supprimer ce membre du personnel ?'))) return;
         PERSONNEL = PERSONNEL.filter(x=>x.id!==btn.dataset.id);
         await savePersonnel(); showToast('Membre supprimé'); render();
@@ -5452,6 +6031,20 @@ function attachHandlers(){
     document.querySelector('[data-action="print-releve-absences"]')?.addEventListener('click', (e)=>{
       openPrint(buildReleveAbsencesHTML(e.target.dataset.classe));
     });
+    document.querySelector('[data-action="print-billets-entree"]')?.addEventListener('click', async ()=>{
+      const saisie = await demanderSaisie("Combien de billets d'entrée voulez-vous imprimer ? (8 par page)", {placeholder:'ex : 16'});
+      if(saisie===null) return;
+      const nb = parseInt(saisie, 10);
+      if(!nb || nb<1){ alert('Veuillez entrer un nombre valide.'); return; }
+      openPrint(buildBilletsPrintHTML('entree', nb));
+    });
+    document.querySelector('[data-action="print-billets-sortie"]')?.addEventListener('click', async ()=>{
+      const saisie = await demanderSaisie('Combien de billets de sortie voulez-vous imprimer ? (8 par page)', {placeholder:'ex : 16'});
+      if(saisie===null) return;
+      const nb = parseInt(saisie, 10);
+      if(!nb || nb<1){ alert('Veuillez entrer un nombre valide.'); return; }
+      openPrint(buildBilletsPrintHTML('sortie', nb));
+    });
     document.querySelector('[data-action="export-csv-absences"]')?.addEventListener('click', (e)=>{
       const classe = e.target.dataset.classe;
       const absences = ABSENCES.filter(a=>{ const el = ELEVES.find(x=>x.id===a.eleveId); return el && el.classe===classe; });
@@ -5475,6 +6068,22 @@ function attachHandlers(){
       const jour = td.dataset.jour, creneau = td.dataset.creneau;
       const matiereId = td.querySelector('.select-matiere-emploi').value;
       const personnelId = td.querySelector('.select-enseignant-emploi').value;
+
+      // Détection de conflit : le même enseignant est-il déjà affecté à une AUTRE classe sur ce
+      // même jour/créneau ? On avertit sans bloquer (co-intervention, classes jumelées... des cas
+      // légitimes existent), mais on laisse la personne décider en connaissance de cause.
+      if(personnelId){
+        const conflit = EMPLOI.find(ev=>ev.personnelId===personnelId && ev.jour===jour && ev.creneau===creneau && ev.classe!==classeEmploiTab);
+        if(conflit){
+          const enseignant = PERSONNEL.find(p=>p.id===personnelId);
+          const nomEns = enseignant ? `${enseignant.nom} ${enseignant.prenom}` : 'Cet enseignant';
+          if(!confirm(`${nomEns} est déjà affecté à la classe ${conflit.classe} le ${jour} sur le créneau ${creneau}.\n\nConfirmer quand même cette affectation en ${classeEmploiTab} ?`)){
+            render();
+            return;
+          }
+        }
+      }
+
       EMPLOI = EMPLOI.filter(e=>!(e.classe===classeEmploiTab && e.jour===jour && e.creneau===creneau));
       if(matiereId || personnelId){
         EMPLOI.push({ id: uid(), classe: classeEmploiTab, jour, creneau, matiereId: matiereId||null, personnelId: personnelId||null });
@@ -5497,19 +6106,76 @@ function attachHandlers(){
         alert('Cet identifiant existe déjà. Choisissez-en un autre.');
         return;
       }
+      const estPremierCompte = UTILISATEURS.length===0;
+      // Le tout premier compte active le système de comptes : il doit obligatoirement avoir un
+      // accès complet (Direction), quoi qu'il arrive côté formulaire (défense en profondeur —
+      // les cases à cocher sont déjà désactivées côté affichage pour ce cas).
+      const roleLabel = estPremierCompte ? 'Direction' : (f.get('roleLabel')||'').trim();
+      const tabs = estPremierCompte ? Object.keys(titles) : f.getAll('tabs');
+      if(!estPremierCompte && tabs.length===0){
+        alert('Sélectionnez au moins un onglet accessible pour ce compte.');
+        return;
+      }
       const sel = Math.random().toString(36).slice(2)+Date.now().toString(36);
       const hash = await hacherMotDePasse(f.get('motDePasse'), sel);
-      UTILISATEURS.push({ id: uid(), nom: (f.get('nom')||'').trim(), identifiant, role: f.get('role'), sel, hash });
+      UTILISATEURS.push({ id: uid(), nom: (f.get('nom')||'').trim(), identifiant, roleLabel, tabs, sel, hash });
       await saveUtilisateurs();
-      showToast('Compte créé');
+      showToast(estPremierCompte ? 'Compte Direction créé — la connexion est maintenant obligatoire à chaque ouverture' : 'Compte créé');
       render();
     });
     document.querySelectorAll('[data-action="del-utilisateur"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
+        const cible = UTILISATEURS.find(u=>u.id===btn.dataset.id);
+        const autresAvecParametres = UTILISATEURS.filter(u=>u.id!==btn.dataset.id && (u.tabs||[]).includes('parametres'));
+        if(cible && (cible.tabs||[]).includes('parametres') && autresAvecParametres.length===0){
+          alert("Impossible de supprimer ce compte : ce serait le dernier ayant accès à Paramètres, et plus personne ne pourrait ensuite gérer les comptes utilisateurs.\n\nDonnez d'abord l'accès à Paramètres à un autre compte avant de supprimer celui-ci.");
+          return;
+        }
         if(!(await confirmerAvecCode('Supprimer ce compte utilisateur ?'))) return;
         UTILISATEURS = UTILISATEURS.filter(u=>u.id!==btn.dataset.id);
         await saveUtilisateurs();
         showToast('Compte supprimé');
+        render();
+      });
+    });
+    document.querySelectorAll('[data-action="ouvrir-modifier-compte"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const ligne = document.getElementById('ligne-modifier-'+btn.dataset.id);
+        if(ligne) ligne.style.display = ligne.style.display==='none' ? '' : 'none';
+      });
+    });
+    document.querySelectorAll('.form-modifier-compte').forEach(form=>{
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const u = UTILISATEURS.find(x=>x.id===form.dataset.id);
+        if(!u) return;
+        const f = new FormData(form);
+        const nouvelIdentifiant = (f.get('identifiant')||'').trim();
+        if(UTILISATEURS.some(x=>x.id!==u.id && x.identifiant.toLowerCase()===nouvelIdentifiant.toLowerCase())){
+          alert(`L'identifiant « ${nouvelIdentifiant} » est déjà utilisé par un autre compte.`);
+          return;
+        }
+        const nouveauxTabs = f.getAll('tabs');
+        if(nouveauxTabs.length===0){
+          alert('Sélectionnez au moins un onglet accessible pour ce compte.');
+          return;
+        }
+        // Empêche de retirer l'accès à Paramètres si ce compte est le dernier à l'avoir — sinon
+        // plus personne ne pourrait gérer les comptes utilisateurs par la suite.
+        const perdParametres = (u.tabs||[]).includes('parametres') && !nouveauxTabs.includes('parametres');
+        if(perdParametres){
+          const autresAvecParametres = UTILISATEURS.some(x=>x.id!==u.id && (x.tabs||[]).includes('parametres'));
+          if(!autresAvecParametres){
+            alert("Impossible de retirer l'accès à Paramètres de ce compte : ce serait le dernier à l'avoir, et plus personne ne pourrait ensuite gérer les comptes utilisateurs.\n\nDonnez d'abord l'accès à Paramètres à un autre compte.");
+            return;
+          }
+        }
+        u.nom = (f.get('nom')||'').trim();
+        u.identifiant = nouvelIdentifiant;
+        u.roleLabel = (f.get('roleLabel')||'').trim();
+        u.tabs = nouveauxTabs;
+        await saveUtilisateurs();
+        showToast('Compte mis à jour pour '+u.nom);
         render();
       });
     });
@@ -5562,10 +6228,11 @@ function attachHandlers(){
       alert(`Bascule terminée.\n\nPassent en classe supérieure : ${bilan.passent}\nRedoublent : ${bilan.redoublent}\nExclus : ${bilan.excluent}\nSortis du système (fin de cycle) : ${bilan.sortent}`);
     });
 
-    document.getElementById('form-deverrouiller')?.addEventListener('submit', (e)=>{
+    document.getElementById('form-deverrouiller')?.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const f = new FormData(e.target);
-      if((f.get('pin')||'') === PARAMS.pinVerrouillage){
+      const hash = await hacherMotDePasse(f.get('pin')||'', PARAMS.pinVerrouillageSel);
+      if(hash === PARAMS.pinVerrouillageHash){
         parametresDeverrouille = true;
         render();
       } else {
@@ -5578,7 +6245,9 @@ function attachHandlers(){
       const f = new FormData(e.target);
       const pin = (f.get('pin')||'').trim();
       if(pin){
-        PARAMS.pinVerrouillage = pin;
+        const sel = uid();
+        PARAMS.pinVerrouillageSel = sel;
+        PARAMS.pinVerrouillageHash = await hacherMotDePasse(pin, sel);
         parametresDeverrouille = true;
         await saveParams();
         showToast('Code de verrouillage enregistré');
@@ -5586,7 +6255,8 @@ function attachHandlers(){
       }
     });
     document.getElementById('btn-retirer-verrouillage')?.addEventListener('click', async ()=>{
-      PARAMS.pinVerrouillage = '';
+      PARAMS.pinVerrouillageHash = '';
+      PARAMS.pinVerrouillageSel = '';
       await saveParams();
       showToast('Verrouillage retiré');
       render();
@@ -5601,7 +6271,9 @@ function attachHandlers(){
       const f = new FormData(e.target);
       const code = (f.get('code')||'').trim();
       if(code){
-        PARAMS.codeSuppression = code;
+        const sel = uid();
+        PARAMS.codeSuppressionSel = sel;
+        PARAMS.codeSuppressionHash = await hacherMotDePasse(code, sel);
         await saveParams();
         showToast('Code de suppression enregistré');
         render();
@@ -5609,7 +6281,8 @@ function attachHandlers(){
     });
     document.getElementById('btn-retirer-code-suppression')?.addEventListener('click', async ()=>{
       if(!(await confirmerAvecCode('Retirer la protection par code de suppression ? Toute personne pourra ensuite supprimer des données sans confirmation.'))) return;
-      PARAMS.codeSuppression = '';
+      PARAMS.codeSuppressionHash = '';
+      PARAMS.codeSuppressionSel = '';
       await saveParams();
       showToast('Protection retirée');
       render();
@@ -5617,7 +6290,7 @@ function attachHandlers(){
 
     // Réinitialisations localisées (année en cours)
     const resetsLocalises = {
-      'reset-eleves': { label: 'tous les élèves', fn: async ()=>{ ELEVES = []; await saveEleves(); } },
+      'reset-eleves': { label: 'tous les élèves', fn: async ()=>{ const ids = ELEVES.map(e=>e.id); ELEVES = []; await Promise.all(ids.map(id=>imageDBSet('photo-'+id, null))); await saveEleves(); } },
       'reset-notes': { label: 'toutes les notes et les réductions de conduite/absence', fn: async ()=>{ NOTES = []; DISCIPLINE = {}; await saveNotes(); await saveDiscipline(); } },
       'reset-examens-blancs': { label: 'tous les examens blancs', fn: async ()=>{ EXAMENS_BLANCS = []; NOTES_BLANC = []; DECISIONS_BLANC = {}; await saveExamensBlancs(); await saveNotesBlanc(); await saveDecisionsBlanc(); } },
       'reset-decisions': { label: 'toutes les décisions de fin d\'année', fn: async ()=>{ DECISIONS = {}; await saveDecisions(); } },
@@ -5640,7 +6313,9 @@ function attachHandlers(){
     document.querySelector('[data-action="reset-annee-complete"]')?.addEventListener('click', async ()=>{
       if(!(await confirmerAvecCode(`Tout réinitialiser pour l'année en cours (${esc(anneeLibelle(anneeActiveId))}) ?`))) return;
       if(!confirm("Dernière confirmation : élèves, notes, examens blancs, décisions, finances, personnel et paie de l'année en cours seront TOUS effacés définitivement. Les classes, matières et tarifs sont conservés. Continuer ?")) return;
+      const idsElevesAvantReset = ELEVES.map(e=>e.id);
       ELEVES = []; NOTES = []; EXAMENS_BLANCS = []; NOTES_BLANC = []; DECISIONS_BLANC = {}; ABSENCES = []; DISCIPLINE = {}; EMPLOI = []; DECISIONS = {}; FINANCES = { paiements: [], depenses: [] }; PERSONNEL = []; PAIE = [];
+      await Promise.all(idsElevesAvantReset.map(id=>imageDBSet('photo-'+id, null)));
       await Promise.all([saveEleves(), saveNotes(), saveExamensBlancs(), saveNotesBlanc(), saveDecisionsBlanc(), saveAbsences(), saveDiscipline(), saveEmploi(), saveDecisions(), saveFinances(), savePersonnel(), savePaie()]);
       showToast("Année en cours réinitialisée");
       render();
@@ -5655,6 +6330,7 @@ function attachHandlers(){
         if(!confirm(`Dernière confirmation : toutes les données archivées de ${esc(libelle)} (élèves, notes, finances, personnel, paie) seront effacées définitivement. L'année restera dans l'historique mais sans données. Continuer ?`)) return;
         delete ARCHIVES[id];
         await saveArchives();
+        await purgerPhotosOrphelines();
         showToast('Archive réinitialisée');
         render();
       });
@@ -5669,6 +6345,7 @@ function attachHandlers(){
         ANNEES = ANNEES.filter(a=>a.id!==id);
         if(anneeAffichee===id) anneeAffichee = anneeActiveId;
         await Promise.all([saveArchives(), saveAnnees()]);
+        await purgerPhotosOrphelines();
         updateAnneeSelect();
         showToast('Année supprimée');
         render();
@@ -5939,9 +6616,12 @@ function attachHandlers(){
     });
     document.querySelectorAll('[data-action="del-matiere"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!(await confirmerAvecCode('Supprimer cette matière ?'))) return;
         const classe = btn.dataset.classe;
-        PARAMS.matieresParClasse[classe] = matieresPourClasse(classe).filter(x=>x.id!==btn.dataset.id);
+        const matiereId = btn.dataset.id;
+        const nbNotes = NOTES.filter(n=>n.matiereId===matiereId).length;
+        if(nbNotes>0 && !confirm(`Attention : ${nbNotes} note(s) ont déjà été saisies pour cette matière. Elles ne seront pas supprimées, mais deviendront invisibles dans la saisie des notes tout en continuant à compter dans les moyennes avec un coefficient par défaut de 1 (au lieu du coefficient réel de cette matière) — ce qui peut fausser les moyennes déjà calculées.\n\nContinuer quand même ?`)) return;
+        if(!(await confirmerAvecCode('Supprimer cette matière ?'))) return;
+        PARAMS.matieresParClasse[classe] = matieresPourClasse(classe).filter(x=>x.id!==matiereId);
         await saveParams(); showToast('Matière supprimée'); render();
       });
     });
@@ -5950,18 +6630,63 @@ function attachHandlers(){
       e.preventDefault();
       const f = new FormData(e.target);
       const nom = f.get('nom');
-      PARAMS.classes.push({ id: uid(), nom, fraisAnnuel: Number(f.get('fraisAnnuel'))||0 });
+      PARAMS.classes.push({ id: uid(), nom, fraisAffecte: Number(f.get('fraisAffecte'))||0, fraisNonAffecte: Number(f.get('fraisNonAffecte'))||0 });
       if(!PARAMS.matieresParClasse) PARAMS.matieresParClasse = {};
       if(!PARAMS.matieresParClasse[nom]) PARAMS.matieresParClasse[nom] = [];
       await saveParams(); showToast('Classe ajoutée'); render();
     });
+    document.querySelectorAll('[data-action="edit-frais-classe"]').forEach(input=>{
+      input.addEventListener('change', async ()=>{
+        const c = PARAMS.classes.find(x=>x.id===input.dataset.id);
+        if(c){ c[input.dataset.champ] = Number(input.value)||0; await saveParams(); showToast('Frais mis à jour'); }
+      });
+    });
+    document.querySelectorAll('[data-action="renommer-classe"]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const classeObj = PARAMS.classes.find(x=>x.id===btn.dataset.id);
+        if(!classeObj) return;
+        const saisie = await demanderSaisie(`Nouveau nom pour la classe « ${classeObj.nom} » :`, {placeholder: classeObj.nom});
+        if(saisie===null) return;
+        const nouveauNom = saisie.trim();
+        if(!nouveauNom || nouveauNom===classeObj.nom) return;
+        if(PARAMS.classes.some(x=>x.id!==classeObj.id && x.nom===nouveauNom)){
+          alert(`Une classe nommée « ${nouveauNom} » existe déjà.`);
+          return;
+        }
+        // Renommer met à jour partout où le nom de classe est utilisé comme référence textuelle,
+        // pour éviter le problème qui rendait des élèves invisibles après une suppression/
+        // recréation de classe (au lieu d'un simple renommage).
+        const ancienNom = classeObj.nom;
+        classeObj.nom = nouveauNom;
+        if(PARAMS.matieresParClasse && PARAMS.matieresParClasse[ancienNom]!==undefined){
+          PARAMS.matieresParClasse[nouveauNom] = PARAMS.matieresParClasse[ancienNom];
+          delete PARAMS.matieresParClasse[ancienNom];
+        }
+        if(PROF_PRINCIPAL[ancienNom]!==undefined){
+          PROF_PRINCIPAL[nouveauNom] = PROF_PRINCIPAL[ancienNom];
+          delete PROF_PRINCIPAL[ancienNom];
+        }
+        ELEVES.forEach(el=>{ if(el.classe===ancienNom) el.classe = nouveauNom; });
+        EMPLOI.forEach(ev=>{ if(ev.classe===ancienNom) ev.classe = nouveauNom; });
+        await Promise.all([saveParams(), saveProfPrincipal(), saveEleves(), saveEmploi()]);
+        showToast(`Classe renommée en « ${nouveauNom} »`);
+        render();
+      });
+    });
     document.querySelectorAll('[data-action="del-classe"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        if(!(await confirmerAvecCode('Supprimer cette classe ?'))) return;
         const classeSupprimee = PARAMS.classes.find(x=>x.id===btn.dataset.id)?.nom;
+        const nbEleves = classeSupprimee ? ELEVES.filter(e=>e.classe===classeSupprimee).length : 0;
+        if(nbEleves>0){
+          alert(`Impossible de supprimer cette classe : ${nbEleves} élève(s) y sont encore inscrit(s).\n\nRéaffectez-les d'abord à une autre classe (bouton « Changer de classe » sur leur fiche) avant de supprimer.`);
+          return;
+        }
+        if(!(await confirmerAvecCode('Supprimer cette classe ?'))) return;
         PARAMS.classes = PARAMS.classes.filter(x=>x.id!==btn.dataset.id);
         if(classeSupprimee && PARAMS.matieresParClasse) delete PARAMS.matieresParClasse[classeSupprimee];
-        await saveParams(); showToast('Classe supprimée'); render();
+        if(classeSupprimee && PROF_PRINCIPAL[classeSupprimee]!==undefined) delete PROF_PRINCIPAL[classeSupprimee];
+        await Promise.all([saveParams(), saveProfPrincipal()]);
+        showToast('Classe supprimée'); render();
       });
     });
 
@@ -6071,7 +6796,7 @@ const saveUtilisateurs = () => save('utilisateurs-data', UTILISATEURS);
 
 function ongletsAutorises(){
   if(!UTILISATEUR_COURANT) return null; // null = pas de restriction (accès libre)
-  return ROLES[UTILISATEUR_COURANT.role]?.tabs || [];
+  return UTILISATEUR_COURANT.tabs || [];
 }
 function appliquerRestrictionsRole(){
   const autorises = ongletsAutorises();
@@ -6088,7 +6813,7 @@ function appliquerRestrictionsRole(){
   const foot = document.getElementById('sidebar-foot-content');
   if(foot){
     if(UTILISATEUR_COURANT){
-      foot.innerHTML = `Connecté : <strong>${esc(UTILISATEUR_COURANT.nom)}</strong> (${esc(ROLES[UTILISATEUR_COURANT.role]?.label||UTILISATEUR_COURANT.role)})<br><button class="btn secondary small" id="btn-deconnexion" style="margin-top:6px;">Changer de compte</button>`;
+      foot.innerHTML = `Connecté : <strong>${esc(UTILISATEUR_COURANT.nom)}</strong> (${esc(UTILISATEUR_COURANT.roleLabel||'')})<br><button class="btn secondary small" id="btn-deconnexion" style="margin-top:6px;">Changer de compte</button>`;
       document.getElementById('btn-deconnexion')?.addEventListener('click', ()=>{
         sessionStorage.removeItem('utilisateur-session-id');
         UTILISATEUR_COURANT = null;
@@ -6102,6 +6827,20 @@ function appliquerRestrictionsRole(){
 
 async function verifierConnexionEtDemarrer(){
   UTILISATEURS = storageGet('utilisateurs-data') || [];
+  // Migration : les comptes utilisaient auparavant un rôle fixe parmi une liste figée
+  // (Direction/Comptable/Surveillant/Enseignant) avec des onglets imposés par rôle. Les rôles
+  // sont désormais libres : chaque compte a un intitulé de rôle au choix et une liste d'onglets
+  // accessibles choisie individuellement par la Direction à la création du compte.
+  let migrationComptes = false;
+  UTILISATEURS.forEach(u=>{
+    if(!u.tabs){
+      u.tabs = [...(ROLES[u.role]?.tabs || []), 'admin'];
+      u.roleLabel = ROLES[u.role]?.label || u.role || '';
+      delete u.role;
+      migrationComptes = true;
+    }
+  });
+  if(migrationComptes) await saveUtilisateurs();
   if(UTILISATEURS.length===0){
     document.getElementById('connexion-overlay').style.display = 'none';
     loadAll();
@@ -6117,7 +6856,7 @@ async function verifierConnexionEtDemarrer(){
   }
   const overlay = document.getElementById('connexion-overlay');
   const select = document.getElementById('select-utilisateur');
-  select.innerHTML = UTILISATEURS.map(u=>`<option value="${u.id}">${esc(u.nom)} — ${esc(ROLES[u.role]?.label||u.role)}</option>`).join('');
+  select.innerHTML = UTILISATEURS.map(u=>`<option value="${u.id}">${esc(u.nom)} — ${esc(u.roleLabel||'')}</option>`).join('');
   overlay.style.display = 'flex';
   document.getElementById('erreur-connexion').style.display = 'none';
   document.getElementById('form-connexion').addEventListener('submit', async (e)=>{
