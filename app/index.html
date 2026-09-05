@@ -5,14 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestion d'établissement</title>
 
-<!-- PWA : permet l'installation sur écran d'accueil (icône propre, plein écran, hors-ligne) -->
-<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0d1b3e">
 <link rel="icon" href="./icon-192.png">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Établissement">
 <style>
   :root{
@@ -236,11 +230,11 @@
   .receipt, .bulletin{font-family:var(--sans);color:#111;max-width:560px;margin:0 auto;}
   .receipt h2, .bulletin h2{font-family:var(--serif);color:var(--navy);margin:0 0 1px 0;font-size:16px;text-align:center;}
   .doc-logo{display:block;max-width:70px;max-height:70px;margin:0 auto 4px auto;object-fit:contain;}
-  .doc-officiel{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;line-height:1.4;}
-  .doc-col-gauche{flex:1 1 0;text-align:left;min-width:0;}
-  .doc-col-centre{flex:0 0 auto;text-align:center;max-width:38%;}
-  .doc-col-centre h2{margin:0;}
-  .doc-col-droite{flex:1 1 0;text-align:right;min-width:0;}
+  .doc-officiel{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px 8px;margin-bottom:8px;line-height:1.4;}
+  .doc-col-gauche{flex:1 1 160px;text-align:left;min-width:0;overflow-wrap:break-word;}
+  .doc-col-centre{flex:0 1 auto;text-align:center;max-width:38%;min-width:0;overflow-wrap:break-word;}
+  .doc-col-centre h2{margin:0;overflow-wrap:break-word;}
+  .doc-col-droite{flex:1 1 160px;text-align:right;min-width:0;overflow-wrap:break-word;}
   .table-emploi td, .table-emploi th{font-size:11px;padding:4px 5px;text-align:center;}
   .table-emploi .col-creneau{white-space:nowrap;font-size:10px;text-align:left;background:#fafaf8;}
   .table-emploi select{font-size:10.5px;padding:2px;}
@@ -377,7 +371,7 @@
   .carte-scolaire.verso .carte-scolaire-watermark svg{width:100%; height:100%;}
   .carte-scolaire-header{display:flex;align-items:center;gap:5px;padding:2.8mm 3.5mm 1mm 3.5mm;position:relative;z-index:1;}
   .carte-scolaire-header img{width:8mm;height:8mm;object-fit:contain;background:#fff;border-radius:1.5px;padding:0.6mm;flex-shrink:0;}
-  .carte-scolaire-header .ecole-nom{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1.15;}
+  .carte-scolaire-header .ecole-nom{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1.15;min-width:0;overflow-wrap:break-word;}
   .carte-scolaire-titre{font-size:5.5px;letter-spacing:.28em;color:var(--gold-soft);text-transform:uppercase;padding:0 3.5mm;position:relative;z-index:1;}
   .carte-scolaire-corps{display:flex;gap:3mm;padding:1.6mm 3.5mm;flex:1;position:relative;z-index:1;align-items:center;}
   .carte-scolaire-photo{width:15.6mm;height:20mm;border-radius:1.5mm;border:0.5mm solid var(--gold);background:#2a3f68;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
@@ -484,6 +478,13 @@
     </form>
     <p class="muted" id="erreur-activation" style="margin-top:10px;display:none;color:var(--red);text-align:center;">Nom d'établissement ou clé de licence incorrect(e), ou licence expirée.</p>
     <p class="muted" style="margin-top:22px;text-align:center;font-size:11px;">Pas de clé ? Contactez le fournisseur du logiciel.</p>
+    <div id="bloc-identifiant-machine" style="margin-top:16px;padding:10px 12px;background:var(--bg-soft,#f4f4f8);border-radius:8px;display:none;">
+      <p class="muted" style="font-size:11px;margin:0 0 4px 0;">Identifiant de cet ordinateur (à transmettre au fournisseur avec le nom de l'établissement, pour qu'il génère votre clé) :</p>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="champ-identifiant-machine" readonly style="font-family:monospace;font-size:11px;flex:1;" onclick="this.select()">
+        <button type="button" class="btn secondary small" id="btn-copier-identifiant-machine">Copier</button>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -697,6 +698,12 @@ const DEFAULT_PARAMS = {
 
 /* ---------- State ---------- */
 let ELEVES = [];
+// Affichage progressif des grandes listes de classe : au-delà de SEUIL_AFFICHAGE_CLASSE élèves,
+// seuls les premiers sont rendus dans le tableau (moins de nœuds DOM à construire/repeindre à
+// chaque frappe). L'utilisateur peut afficher le reste d'un clic ; ce choix n'est pas persistant
+// (remis à zéro à la relance), c'est juste un confort d'affichage, pas une pagination de données.
+const SEUIL_AFFICHAGE_CLASSE = 50;
+let CLASSES_TABLEAU_ETENDU = new Set();
 let NOTES = [];
 let EXAMENS_BLANCS = []; // [{ id, libelle }] — sessions d'examens blancs de l'année active (3e/Tle)
 let NOTES_BLANC = []; // [{ id, eleveId, matiereId, examenBlancId, note }] — notes séparées, hors moyenne trimestrielle
@@ -765,6 +772,23 @@ function showToast(msg){
   clearTimeout(showToast._h);
   showToast._h = setTimeout(()=>t.classList.remove('show'), 1800);
 }
+
+/* ---------- Filet de sécurité global ----------
+   Sans ceci, une erreur JS imprévue n'importe où dans l'appli s'arrêtait en silence :
+   le bouton cliqué "ne répondait plus" sans aucun message, et rien n'indiquait à
+   l'utilisateur (ni à nous) qu'un problème venait de se produire. On avertit toujours
+   l'utilisateur, on note le détail technique dans la console (utile en support), et on
+   limite les alertes en rafale si plusieurs erreurs tombent d'un coup (ex : boucle de rendu). */
+let derniereAlerteErreurLe = 0;
+function signalerErreurInattendue(detail){
+  console.error('Erreur inattendue :', detail);
+  const maintenant = Date.now();
+  if(maintenant - derniereAlerteErreurLe < 4000) return; // évite le spam d'alertes en rafale
+  derniereAlerteErreurLe = maintenant;
+  alert("⚠ UN PROBLÈME INATTENDU EST SURVENU.\n\nL'action en cours n'a peut-être pas abouti. Vos données déjà enregistrées ne sont pas affectées, mais faites une sauvegarde externe par précaution (Paramètres → Sauvegarde) et notez ce que vous étiez en train de faire.\n\nSi le problème se reproduit, contactez le support avec ce détail : " + String(detail && (detail.message || detail)).slice(0,200));
+}
+window.addEventListener('error', (e)=>{ signalerErreurInattendue(e.error || e.message); });
+window.addEventListener('unhandledrejection', (e)=>{ signalerErreurInattendue(e.reason); });
 
 /* ---------- Persistence (localStorage — 100% local, hors-ligne, sur cet ordinateur) ---------- */
 const STORAGE_PREFIX = 'gestion_ecole_';
@@ -838,6 +862,16 @@ function obtenirClePublique(){
   }
   return _cleLicencePubliquePromise;
 }
+// Identifiant matériel stable de cet ordinateur, exposé par preload.js (voir main.js). `null`
+// si l'app tourne hors d'Electron (ex: ouverte dans un navigateur pendant les tests) — dans ce
+// cas le verrouillage machine est simplement ignoré, comme pour une licence sans "mid".
+let _identifiantMachineCache;
+function obtenirIdentifiantMachine(){
+  if(_identifiantMachineCache===undefined){
+    _identifiantMachineCache = (window.licenceAPI && window.licenceAPI.obtenirIdentifiantMachine()) || null;
+  }
+  return _identifiantMachineCache;
+}
 function normaliserTexte(s){
   return (s||'').trim().toUpperCase().replace(/\s+/g,' ');
 }
@@ -861,22 +895,38 @@ async function decoderEtVerifierLicence(licenceBrute, clientName){
     const ok = await crypto.subtle.verify(
       { name:'ECDSA', hash:'SHA-256' }, cle, sig, new TextEncoder().encode(payloadB64)
     );
-    return ok ? { valide:true, payload } : null;
+    if(!ok) return null;
+    // Licence liée à un poste précis (voir generateur-licences.html) : si l'identifiant machine
+    // signé dans la licence ne correspond pas à celui de CET ordinateur, la licence est refusée
+    // même si elle est authentique — elle a simplement été délivrée pour un autre poste.
+    if(payload.mid && payload.mid !== obtenirIdentifiantMachine()) return { mauvaiseMachine:true, payload };
+    return { valide:true, payload };
   }catch(e){ return null; }
 }
-function estActive(){
+async function estActive(){
   const a = storageGet('activation-data');
   if(!(a && a.clientName && a.licence)) return false;
+  // Revérifie la signature cryptographique à CHAQUE démarrage (pas seulement la présence de
+  // champs) : sans ça, quelqu'un ouvrant la console développeur pouvait injecter une fausse
+  // activation dans localStorage et débloquer le logiciel sans aucune licence valide.
+  const resultat = await decoderEtVerifierLicence(a.licence, a.clientName);
+  if(!(resultat && resultat.valide)) return false;
   if(a.exp && new Date(a.exp).getTime() < Date.now()) return false;
+  // Recalculé à chaque démarrage (pas seulement comparé à une valeur stockée) : copier tout le
+  // dossier de données de l'app sur un autre ordinateur ne suffit donc pas à contourner le
+  // verrouillage machine, puisque l'identifiant est recalculé sur la machine réelle à chaque fois.
+  if(a.mid && a.mid !== obtenirIdentifiantMachine()) return false;
   return true;
 }
 async function activerLogiciel(clientName, licenceSaisie){
   const resultat = await decoderEtVerifierLicence(licenceSaisie, clientName);
+  if(resultat && resultat.mauvaiseMachine) return 'mauvaise-machine';
   if(resultat && resultat.valide){
     await save('activation-data', {
       clientName: clientName.trim(),
       licence: (licenceSaisie||'').trim().replace(/\s+/g,''),
       exp: resultat.payload.exp || null,
+      mid: resultat.payload.mid || null,
       activeLe: new Date().toISOString()
     });
     return true;
@@ -1074,6 +1124,7 @@ async function loadAll(){
     await saveNotes();
   }
 
+  await nettoyerDonneesOrphelines();
   updateAnneeSelect();
   render();
   appliquerRestrictionsRole();
@@ -1107,6 +1158,46 @@ const savePaie = () => save('paie-data', PAIE);
 const saveAnnees = () => save('annees-data', ANNEES);
 const saveAnneeActive = () => save('annee-active-data', anneeActiveId);
 const saveArchives = () => save('archives-data', ARCHIVES);
+
+// Supprime, dans TOUS les autres modules, les données rattachées à un élève : sans ça, supprimer
+// un élève ne retirait que sa fiche (voir data-action="del-eleve"), en laissant orphelines ses
+// notes, absences, points de discipline, décisions et paiements — qui restaient comptés dans les
+// totaux financiers du tableau de bord indéfiniment. Retourne les clés effectivement modifiées,
+// pour ne sauvegarder que ce qui a changé.
+async function purgerDonneesEleve(eleveId){
+  const aSauvegarder = [];
+  const avantNotes = NOTES.length; NOTES = NOTES.filter(n=>n.eleveId!==eleveId);
+  if(NOTES.length!==avantNotes) aSauvegarder.push(saveNotes());
+  const avantNotesBlanc = NOTES_BLANC.length; NOTES_BLANC = NOTES_BLANC.filter(n=>n.eleveId!==eleveId);
+  if(NOTES_BLANC.length!==avantNotesBlanc) aSauvegarder.push(saveNotesBlanc());
+  const avantAbsences = ABSENCES.length; ABSENCES = ABSENCES.filter(a=>a.eleveId!==eleveId);
+  if(ABSENCES.length!==avantAbsences) aSauvegarder.push(saveAbsences());
+  const avantPaiements = FINANCES.paiements.length; FINANCES.paiements = FINANCES.paiements.filter(p=>p.eleveId!==eleveId);
+  if(FINANCES.paiements.length!==avantPaiements) aSauvegarder.push(saveFinances());
+  if(DISCIPLINE[eleveId]){ delete DISCIPLINE[eleveId]; aSauvegarder.push(saveDiscipline()); }
+  if(DECISIONS[eleveId]){ delete DECISIONS[eleveId]; aSauvegarder.push(saveDecisions()); }
+  let decisionsBlancTouchees = false;
+  Object.values(DECISIONS_BLANC).forEach(parExamen => { if(parExamen && parExamen[eleveId]!==undefined){ delete parExamen[eleveId]; decisionsBlancTouchees = true; } });
+  if(decisionsBlancTouchees) aSauvegarder.push(saveDecisionsBlanc());
+  await Promise.all(aSauvegarder);
+}
+
+// Nettoyage automatique, au démarrage, des données déjà orphelines d'un élève supprimé avant ce
+// correctif (ex-anciennes suppressions qui n'avaient purgé que la fiche élève). Silencieux et
+// sans risque : ne touche que les enregistrements dont l'eleveId ne correspond à aucun élève.
+async function nettoyerDonneesOrphelines(){
+  const idsExistants = new Set(ELEVES.map(e=>e.id));
+  const idsOrphelins = new Set();
+  NOTES.forEach(n=>{ if(!idsExistants.has(n.eleveId)) idsOrphelins.add(n.eleveId); });
+  NOTES_BLANC.forEach(n=>{ if(!idsExistants.has(n.eleveId)) idsOrphelins.add(n.eleveId); });
+  ABSENCES.forEach(a=>{ if(!idsExistants.has(a.eleveId)) idsOrphelins.add(a.eleveId); });
+  FINANCES.paiements.forEach(p=>{ if(!idsExistants.has(p.eleveId)) idsOrphelins.add(p.eleveId); });
+  Object.keys(DISCIPLINE).forEach(id=>{ if(!idsExistants.has(id)) idsOrphelins.add(id); });
+  Object.keys(DECISIONS).forEach(id=>{ if(!idsExistants.has(id)) idsOrphelins.add(id); });
+  Object.values(DECISIONS_BLANC).forEach(parExamen=>{ if(parExamen) Object.keys(parExamen).forEach(id=>{ if(!idsExistants.has(id)) idsOrphelins.add(id); }); });
+  if(idsOrphelins.size===0) return;
+  for(const id of idsOrphelins) await purgerDonneesEleve(id);
+}
 const saveLogo = () => imageDBSet('logo', LOGO_DATA_URL||null);
 const saveCachetSignature = () => imageDBSet('cachet-signature', CACHET_SIGNATURE_DATA_URL||null);
 const saveQrPersonnalise = () => imageDBSet('qr-personnalise', QR_PERSONNALISE_DATA_URL||null);
@@ -1706,7 +1797,11 @@ function calculSalaire(entry){
   } else { // Fixe
     brut = Number(entry.montantFixe||0);
   }
-  const taxe = brut * (Number(paie.tauxTaxe||0)/100);
+  // Le FCFA n'a pas de sous-unité utilisée en pratique : le taux horaire dérivé d'une division
+  // (montant de référence ÷ heures de référence) produirait sinon des centimes sur le bulletin
+  // de paie (ex: 166 666,6666666667 FCFA), peu sérieux à présenter à un client.
+  brut = Math.round(brut);
+  const taxe = Math.round(brut * (Number(paie.tauxTaxe||0)/100));
   const net = brut - taxe;
   return { brut, taxe, net };
 }
@@ -2237,6 +2332,9 @@ function renderEleves(){
 function renderClasseElevesPanel(classe, nomFilter){
   const filtre = (nomFilter||'').toLowerCase();
   const eleves = ELEVES.filter(e=>e.classe===classe && `${e.nom} ${e.prenom}`.toLowerCase().includes(filtre));
+  const etendu = CLASSES_TABLEAU_ETENDU.has(classe) || eleves.length<=SEUIL_AFFICHAGE_CLASSE;
+  const elevesAffiches = etendu ? eleves : eleves.slice(0, SEUIL_AFFICHAGE_CLASSE);
+  const nbMasques = eleves.length - elevesAffiches.length;
   return `
   <div class="panel">
     <div class="panel-head">
@@ -2252,7 +2350,7 @@ function renderClasseElevesPanel(classe, nomFilter){
         <thead><tr><th>Photo</th><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Contact</th><th>Profession élève</th><th>Personne à prévenir</th><th>Tél. urgence</th><th>Frais annuel</th><th>Payé</th><th>Reste à payer</th><th>Statut</th><th>Sport</th><th></th></tr></thead>
         <tbody>
         ${eleves.length===0 ? '<tr class="empty-row"><td colspan="14">Aucun élève dans cette classe.</td></tr>' :
-          eleves.map(e=>{
+          elevesAffiches.map(e=>{
             const paye = totalPayeParEleve(e.id);
             const reste = Number(e.fraisAnnuel||0) - paye;
             return `<tr data-id="${e.id}">
@@ -2286,6 +2384,7 @@ function renderClasseElevesPanel(classe, nomFilter){
         </tbody>
       </table>
     </div>
+    ${nbMasques>0 ? `<p style="margin-top:10px;"><button class="btn secondary small" data-action="afficher-plus-eleves" data-classe="${esc(classe)}">Afficher les ${nbMasques} élève(s) restant(s)</button></p>` : ''}
   </div>
   `;
 }
@@ -2985,7 +3084,10 @@ function renderDocuments(){
 
 function formatDateFrLongue(dateStr){
   if(!dateStr) return '';
-  const d = new Date(dateStr);
+  // Sans le "T00:00:00", une chaîne "AAAA-MM-JJ" est interprétée en UTC (pas en heure locale) :
+  // sur un poste mal configuré ou hors du fuseau du Burkina Faso (UTC+0), la date affichée sur
+  // un document officiel pourrait alors être décalée d'un jour. Voir aussi formatDateFrCourt.
+  const d = new Date(dateStr.length===10 ? dateStr+'T00:00:00' : dateStr);
   if(isNaN(d)) return '';
   return d.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
 }
@@ -3563,7 +3665,7 @@ const SILHOUETTE_SVG = '<svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)"><c
 
 function formatDateFrCourt(dateStr){
   if(!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = new Date(dateStr.length===10 ? dateStr+'T00:00:00' : dateStr);
   if(isNaN(d)) return '';
   return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric'});
 }
@@ -4784,8 +4886,13 @@ function openPrint(html){
 // BOM UTF-8 en tête pour qu'Excel affiche correctement les accents.
 function exportCSV(nomFichier, entetes, lignes){
   const echapper = v => {
-    const s = (v===null||v===undefined) ? '' : String(v);
-    return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    let s = (v===null||v===undefined) ? '' : String(v);
+    // Excel/LibreOffice interprètent une cellule commençant par =, +, - ou @ comme une formule :
+    // sans cette garde, chaque numéro de téléphone exporté (format "+226 ...") afficherait une
+    // erreur de formule au lieu du numéro. Une tabulation en tête neutralise l'interprétation
+    // sans altérer la valeur affichée.
+    if(/^[=+\-@]/.test(s)) s = '\t'+s;
+    return /["\t;\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
   };
   const contenu = [entetes, ...lignes].map(ligne => ligne.map(echapper).join(';')).join('\r\n');
   const blob = new Blob(['\ufeff'+contenu], { type: 'text/csv;charset=utf-8;' });
@@ -5356,6 +5463,7 @@ function attachHandlers(){
         if(!(await confirmerAvecCode('Supprimer définitivement cet élève et toutes ses données (notes, paiements) ?'))) return;
         ELEVES = ELEVES.filter(x=>x.id!==delBtn.dataset.id);
         await imageDBSet('photo-'+delBtn.dataset.id, null);
+        await purgerDonneesEleve(delBtn.dataset.id);
         await saveEleves(); showToast('Élève supprimé'); render(); return;
       }
       const printListe = e.target.closest('[data-action="print-classe-eleves"]');
@@ -5364,6 +5472,8 @@ function attachHandlers(){
       if(printDispenses){ openPrint(buildListeDispensesSportHTML(printDispenses.dataset.classe)); return; }
       const printImpayes = e.target.closest('[data-action="print-classe-impayes"]');
       if(printImpayes){ openPrint(buildClasseImpayesListHTML(printImpayes.dataset.classe)); return; }
+      const afficherPlus = e.target.closest('[data-action="afficher-plus-eleves"]');
+      if(afficherPlus){ CLASSES_TABLEAU_ETENDU.add(afficherPlus.dataset.classe); render(); return; }
     });
     document.getElementById('content').addEventListener('change', async (e)=>{
       const input = e.target.closest('[data-action="edit-frais"]');
@@ -6879,41 +6989,41 @@ async function verifierConnexionEtDemarrer(){
 }
 
 async function verifierActivationEtDemarrer(){
-  if(estActive()){
+  if(await estActive()){
     document.getElementById('activation-overlay').style.display = 'none';
     await verifierConnexionEtDemarrer();
     return;
   }
   const overlay = document.getElementById('activation-overlay');
   overlay.style.display = 'flex';
+  const idMachine = obtenirIdentifiantMachine();
+  if(idMachine){
+    document.getElementById('champ-identifiant-machine').value = idMachine;
+    document.getElementById('bloc-identifiant-machine').style.display = 'block';
+    document.getElementById('btn-copier-identifiant-machine').addEventListener('click', ()=>{
+      navigator.clipboard.writeText(idMachine).then(()=>showToast('Identifiant copié'));
+    });
+  }
   document.getElementById('form-activation').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const f = new FormData(e.target);
     const clientName = f.get('clientName');
     const cle = f.get('licenseKey');
-    const ok = await activerLogiciel(clientName, cle);
-    if(ok){
+    const resultat = await activerLogiciel(clientName, cle);
+    if(resultat===true){
       overlay.style.display = 'none';
       await verifierConnexionEtDemarrer();
     } else {
-      document.getElementById('erreur-activation').style.display = 'block';
+      const msgErreur = document.getElementById('erreur-activation');
+      msgErreur.textContent = resultat==='mauvaise-machine'
+        ? "Cette clé de licence a été délivrée pour un autre ordinateur (identifiant machine différent). Contactez le fournisseur en lui communiquant l'identifiant affiché ci-dessus."
+        : "Nom d'établissement ou clé de licence incorrect(e), ou licence expirée.";
+      msgErreur.style.display = 'block';
     }
   });
 }
 
 verifierActivationEtDemarrer();
-</script>
-<script>
-  // Enregistrement du service worker : rend l'application installable et utilisable
-  // hors-ligne. Ne fonctionne que si le fichier est servi via http(s) — pas en file://.
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(() => {
-        // Silencieux : si l'appli est ouverte en local (file://), l'enregistrement
-        // échoue simplement et l'appli continue de fonctionner normalement dans le navigateur.
-      });
-    });
-  }
 </script>
 </body>
 </html>
