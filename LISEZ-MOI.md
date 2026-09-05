@@ -89,7 +89,18 @@ toi-même. Étapes :
 ## Licence du logiciel
 
 Ce projet embarque la version de `index.html` qui utilise déjà le nouveau
-système de licence par clé publique/privée. Pense à utiliser
-`generateur-licences.html` (fourni séparément, à garder chez toi) pour
-produire les clés de licence de chaque établissement — rien à voir avec
-cet installeur, qui ne fait qu'empaqueter l'application.
+système de licence par clé publique/privée, désormais **verrouillée à un
+ordinateur précis** (impossible de réutiliser la même clé sur plusieurs
+postes). Procédure :
+
+1. L'école lance l'application : l'écran d'activation affiche un
+   "identifiant machine" propre à son ordinateur, avec un bouton "Copier".
+2. L'école te transmet cet identifiant, avec le nom exact de l'établissement.
+3. Dans `generateur-licences.html` (fourni séparément, à garder chez toi),
+   renseigne le nom, colle l'identifiant machine reçu, et génère la clé.
+4. Transmets la clé à l'école : elle ne fonctionnera que sur l'ordinateur
+   dont l'identifiant a été utilisé à l'étape 3.
+
+Laisser le champ "Identifiant machine" vide dans le générateur produit une
+licence non verrouillée (utilisable sur n'importe quel poste) — à réserver
+aux cas particuliers (démonstration, test).
